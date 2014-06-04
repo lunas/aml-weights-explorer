@@ -4,3 +4,7 @@ table#weights-ui {
 table#weights-ui td {
     border: 1px solid grey;
 }
+
+.not-100 {
+    background-color: orange;
+}
