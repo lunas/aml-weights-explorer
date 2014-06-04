@@ -5,7 +5,8 @@ $ ->
   tangle = new Tangle(document.getElementById("weights-ui"), {
     initialize: ()->
 
-      this.fatf = 46.15
+      # initial weights of the indicators within their category
+      this['fatf'] = 46.15
       this.fin_secrecy = 38.46
       this.us_incsr = 15.38
 
@@ -24,12 +25,14 @@ $ ->
       this.rule_of_law = 33.33
       this.freedom_house = 33.33
 
+      # initial weights of the categories
       this.ml_tf_cat = 65
       this.corruption_risk_cat = 10
       this.fin_transpar_std_cat = 15
       this.public_transpar_account_cat = 5
       this.political_legal_risk_cat = 5
 
+      # weights of indicators for overall score
       this.fatf_osc = this.fatf * this.ml_tf_cat / 100
       this.fin_secrecy_osc = this.fin_secrecy * this.ml_tf_cat / 100
       this.us_incsr_osc = this.us_incsr * this.ml_tf_cat / 100

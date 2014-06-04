@@ -4,7 +4,7 @@
     var render_ranking, render_scatterplot, tangle;
     tangle = new Tangle(document.getElementById("weights-ui"), {
       initialize: function() {
-        this.fatf = 46.15;
+        this['fatf'] = 46.15;
         this.fin_secrecy = 38.46;
         this.us_incsr = 15.38;
         this.ti_cpi = 100;
