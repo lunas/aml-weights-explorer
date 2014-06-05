@@ -1,54 +1,35 @@
-describe "Indicator", () ->
+describe 'Index', () ->
 
-  ml_tf = fatf = tangle = null
+  categ = index= tangle = null
 
   beforeEach () ->
-    ml_tf = new Category( 'ml/tf', 60, 'osc' )
-    fatf  = new Indicator( 'fatf', 50, ml_tf)
+    categ = new Category( 'ml/tf', 60, 'osc' )
+    index  = new Indicator( 'fatf', 50, categ)
     tangle = {
       setValue: (variable, value)->
+      getValue: (variable) ->
+        55
     }
     Index.set_tangle( tangle )
 
-  describe 'constructor', ()->
-
-    it 'should have type "indicator"', () ->
-      expect( fatf.type).toEqual('indicator')
-
-    it 'should have category "ml_tf"', () ->
-      expect( fatf.cat).toEqual( ml_tf )
-
-  describe 'update_osc_weight', ()->
-
-    it 'should set the correct tangle variable with the calculated weight', ()->
-      exp_result = fatf.weight * ml_tf.weight / 100
-      spyOn( tangle, 'setValue' )
-
-      fatf.update_osc_weight()
-      expect( tangle.setValue ).toHaveBeenCalledWith( 'fatf_osc', exp_result )
-
-  describe 'weight_sum_is_100', ()->
-
-    it 'returns true if the sum of weights within the same category is 100', ()->
-      spyOn( fatf.cat, 'weight_sum' ).and.returnValue( 99.1 )
-
-      expect( fatf.weight_sum_is_100() ).toBeTruthy()
-
-    it 'returns false if the sum of weights within the same category is not 100', ()->
-      spyOn( fatf.cat, 'weight_sum' ).and.returnValue( 102 )
-
-      expect( fatf.weight_sum_is_100() ).toBeFalsy()
-
-  describe 'update', ()->
+  describe 'set_weight', () ->
 
     beforeEach () ->
-      spyOn( fatf, 'update_osc_weight')
-      spyOn( fatf, 'weight_sum_is_100').and.returnValue( true )
-      fatf.update(70)
+      spyOn( tangle, 'setValue' )
+      index.set_weight( 23 )
 
-    it 'sets the weight', ()->
-      expect( fatf.weight).toEqual( 70 )
+    it 'sets the weight attribute', () ->
+      expect( index.weight ).toEqual ( 23 )
 
-    it 'updates the osc-weight', ()->
-      expect( fatf.update_osc_weight ).toHaveBeenCalled()
+    it 'sets the value via the tangle', () ->
+      expect( tangle.setValue ).toHaveBeenCalled()
 
+  describe 'get_weight', () ->
+
+    it 'returns the value via the tangle', () ->
+      spyOn( tangle, 'getValue' )
+      index.get_weight()
+      expect( tangle.getValue ).toHaveBeenCalledWith( index.variable )
+
+    it 'returns the correct value', () ->
+      expect( index.get_weight() ).toEqual( 55 )

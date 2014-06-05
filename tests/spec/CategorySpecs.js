@@ -13,7 +13,10 @@
       ind5 = new Indicator('ind11', 33, category2);
       ind6 = new Indicator('ind12', 33, category2);
       tangle = {
-        setValue: function(variable, value) {}
+        setValue: function(variable, value) {},
+        getValue: function(variable) {
+          return false;
+        }
       };
       Index.set_tangle(tangle);
       Index.set_indices([ind1, ind2, ind3, ind4, ind5, ind6]);

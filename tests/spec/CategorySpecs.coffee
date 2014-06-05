@@ -13,6 +13,7 @@ describe 'Category', ()->
     ind6 = new Indicator( 'ind12', 33, category2 )
     tangle = {
       setValue: (variable, value)->
+      getValue: (variable) -> false
     }
     Index.set_tangle( tangle )
     Index.set_indices( [ind1, ind2, ind3, ind4, ind5, ind6] )
@@ -51,7 +52,7 @@ describe 'Category', ()->
       category.update(70)
 
     it 'sets the weight', ()->
-      expect( category.weight).toEqual( 70 )
+      expect( category.weight ).toEqual( 70 )
 
     it 'updates the osc-weights of its indicators', ()->
       for ind in [ ind1, ind2, ind3 ]

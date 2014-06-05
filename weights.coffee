@@ -2,18 +2,31 @@
 $ ->
   ##################### Tangle
 
+  # Need to create a tangle first because a reference to it is required by the Index class.
+  # So we create one with just a dummy model:
+  tangle = new Tangle(document.getElementById("weights-ui"), {
+    initialize: () ->
+    update: () ->
+  })
+
+  # Base class to handle both indicators and categories.
+  # Holds the initial weights, manages updates via a static reference to the tangle.
+  # Class variables hold a list of all indicators and categories.
   window.Index = class Index
 
-    constructor: (@variable, @weight, @cat) -> @type = 'indicator'
+    constructor: (@variable, @weight, @cat) ->
 
     @_indices: null
     @_categories: null
-    @_model_class: null
+    @_tangle: null
 
-    set_weight: () -> @weight = Index._model_class[ @variable ]
-    get_weight: () -> Index._model_class[ @variable ] or @weight
+    set_weight: (value) ->
+      @weight = value
+      Index._tangle.setValue( @variable, @weight )
 
-    update: () -> mark_cat() if not @weight_sum_is_100()
+    get_weight: () -> Index._tangle.getValue( @variable ) or @weight
+
+    update: () -> @mark_cat() if not @weight_sum_is_100()
 
     weight_sum_is_100: ()-> false
 
@@ -27,11 +40,13 @@ $ ->
 
     near_100: (value) -> Math.abs( value - 100 ) <= 1
 
+    # class methods
+
     @set_indices: (indices) -> Index._indices = indices
 
     @set_categories: (categories) -> Index._categories = categories
 
-    @set_model_class: (mc) -> Index._model_class = mc
+    @set_tangle: (tangle) -> Index._tangle = tangle
 
 
   window.Indicator = class Indicator extends Index
@@ -43,7 +58,7 @@ $ ->
 
     update_osc_weight: ()->
       osc_variable = @variable + '_osc'
-      Index._model_class[osc_variable] = @calculate_osc_weight()
+      Index._tangle.setValue( osc_variable, @calculate_osc_weight() )
 
     calculate_osc_weight: ()-> @get_weight() * @cat.get_weight() / 100
 
@@ -57,7 +72,7 @@ $ ->
   window.Category = class Category extends Index
 
     update: (new_value)->
-      @weight = new_value
+      @set_weight(new_value)
       sub_indices = @get_my_indices()
       for index in sub_indices
         index.update_osc_weight()
@@ -83,7 +98,7 @@ $ ->
 
 
 
-  tangle = new Tangle(document.getElementById("weights-ui"), {
+  model = {
     categories: [
       new Category 'ml_tf', 65, 'osc'
       new Category 'corruption_risk', 10, 'osc'
@@ -118,7 +133,7 @@ $ ->
 
       Index.set_indices( @indicators )
       Index.set_categories( @categories )
-      Index.set_model_class( this )
+      Index.set_tangle( tangle )
 
       # initial weights of the indicators within their category
       for ind in @indicators
@@ -126,13 +141,15 @@ $ ->
         this[ ind.variable + '_osc' ] = ind.calculate_osc_weight()
 
       # initial weights of the categories
-      this[ cat.variable ] = cat.get_weight() for cat in @categories
+        this[ cat.variable ] = cat.weight for cat in @categories
 
     update: ()->
       for ind in @indicators
         ind.update_osc_weight()
 
-  })
+  }
+
+  tangle.setModel( model )
 
   ##################### D3
   d3.csv "aml.csv", (error, data) ->

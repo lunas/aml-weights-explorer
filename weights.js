@@ -4,32 +4,36 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   $(function() {
-    var Category, Index, Indicator, render_ranking, render_scatterplot, tangle;
+    var Category, Index, Indicator, model, render_ranking, render_scatterplot, tangle;
+    tangle = new Tangle(document.getElementById("weights-ui"), {
+      initialize: function() {},
+      update: function() {}
+    });
     window.Index = Index = (function() {
       function Index(variable, weight, cat) {
         this.variable = variable;
         this.weight = weight;
         this.cat = cat;
-        this.type = 'indicator';
       }
 
       Index._indices = null;
 
       Index._categories = null;
 
-      Index._model_class = null;
+      Index._tangle = null;
 
-      Index.prototype.set_weight = function() {
-        return this.weight = Index._model_class[this.variable];
+      Index.prototype.set_weight = function(value) {
+        this.weight = value;
+        return Index._tangle.setValue(this.variable, this.weight);
       };
 
       Index.prototype.get_weight = function() {
-        return Index._model_class[this.variable] || this.weight;
+        return Index._tangle.getValue(this.variable) || this.weight;
       };
 
       Index.prototype.update = function() {
         if (!this.weight_sum_is_100()) {
-          return mark_cat();
+          return this.mark_cat();
         }
       };
 
@@ -63,8 +67,8 @@
         return Index._categories = categories;
       };
 
-      Index.set_model_class = function(mc) {
-        return Index._model_class = mc;
+      Index.set_tangle = function(tangle) {
+        return Index._tangle = tangle;
       };
 
       return Index;
@@ -86,7 +90,7 @@
       Indicator.prototype.update_osc_weight = function() {
         var osc_variable;
         osc_variable = this.variable + '_osc';
-        return Index._model_class[osc_variable] = this.calculate_osc_weight();
+        return Index._tangle.setValue(osc_variable, this.calculate_osc_weight());
       };
 
       Indicator.prototype.calculate_osc_weight = function() {
@@ -120,7 +124,7 @@
 
       Category.prototype.update = function(new_value) {
         var index, sub_indices, _i, _len;
-        this.weight = new_value;
+        this.set_weight(new_value);
         sub_indices = this.get_my_indices();
         for (_i = 0, _len = sub_indices.length; _i < _len; _i++) {
           index = sub_indices[_i];
@@ -167,26 +171,31 @@
       return Category;
 
     })(Index);
-    tangle = new Tangle(document.getElementById("weights-ui"), {
+    model = {
       categories: [new Category('ml_tf', 65, 'osc'), new Category('corruption_risk', 10, 'osc'), new Category('fin_transpar_std', 15, 'osc'), new Category('public_transpar_account', 5, 'osc'), new Category('political_legal_risk', 5, 'osc')],
       indicators: [],
       initialize: function() {
-        var cat, ind, _i, _j, _len, _len1, _ref, _ref1, _results;
+        var cat, ind, _i, _len, _ref, _results;
         this.indicators = [new Indicator('fatf', 46.15, this.categories[0]), new Indicator('fin_secrecy', 38.46, this.categories[0]), new Indicator('us_incsr', 15.18, this.categories[0]), new Indicator('ti_cpi', 100, this.categories[1]), new Indicator('business_disclosure', 12.5, this.categories[2]), new Indicator('auditing_std', 37.5, this.categories[2]), new Indicator('security_exchange', 37.5, this.categories[2]), new Indicator('fin_sector', 12.5, this.categories[2]), new Indicator('open_budget', 33.33, this.categories[3]), new Indicator('transpar_account_corr', 33.33, this.categories[3]), new Indicator('political_disclosure', 33.33, this.categories[3]), new Indicator('instit_strength', 33.33, this.categories[4]), new Indicator('rule_of_law', 33.33, this.categories[4]), new Indicator('freedom_house', 33.33, this.categories[4])];
         Index.set_indices(this.indicators);
         Index.set_categories(this.categories);
-        Index.set_model_class(this);
+        Index.set_tangle(tangle);
         _ref = this.indicators;
+        _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           ind = _ref[_i];
           this[ind.variable] = ind.get_weight();
           this[ind.variable + '_osc'] = ind.calculate_osc_weight();
-        }
-        _ref1 = this.categories;
-        _results = [];
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          cat = _ref1[_j];
-          _results.push(this[cat.variable] = cat.get_weight());
+          _results.push((function() {
+            var _j, _len1, _ref1, _results1;
+            _ref1 = this.categories;
+            _results1 = [];
+            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+              cat = _ref1[_j];
+              _results1.push(this[cat.variable] = cat.weight);
+            }
+            return _results1;
+          }).call(this));
         }
         return _results;
       },
@@ -200,7 +209,8 @@
         }
         return _results;
       }
-    });
+    };
+    tangle.setModel(model);
     d3.csv("aml.csv", function(error, data) {
       if (error) {
         console.log(error);
