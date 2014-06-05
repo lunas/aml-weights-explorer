@@ -32,27 +32,25 @@
       };
 
       Index.prototype.update = function() {
-        if (!this.weight_sum_is_100()) {
-          return this.mark_cat();
-        }
+        return this.mark_cat(!this.weight_sum_is_100());
       };
 
       Index.prototype.weight_sum_is_100 = function() {
         return false;
       };
 
-      Index.prototype.mark_cat = function() {};
+      Index.prototype.mark_cat = function(switch_on) {};
 
       Index.prototype.selector = function() {
         return '[data-var=' + this.variable + ']';
       };
 
-      Index.prototype.mark = function() {
-        return $(this.selector()).addClass('not-100');
-      };
-
-      Index.prototype.unmark = function() {
-        return $(this.selector()).removeClass('not-100');
+      Index.prototype.mark = function(switch_on) {
+        if (switch_on) {
+          return $(this.selector()).addClass('not-100');
+        } else {
+          return $(this.selector()).removeClass('not-100');
+        }
       };
 
       Index.prototype.near_100 = function(value) {
@@ -81,8 +79,7 @@
         return Indicator.__super__.constructor.apply(this, arguments);
       }
 
-      Indicator.prototype.update = function(new_value) {
-        this.set_weight(new_value);
+      Indicator.prototype.update = function() {
         this.update_osc_weight();
         return Indicator.__super__.update.apply(this, arguments);
       };
@@ -101,13 +98,13 @@
         return this.near_100(this.cat.weight_sum());
       };
 
-      Indicator.prototype.mark_cat = function() {
+      Indicator.prototype.mark_cat = function(switch_on) {
         var index, _i, _len, _ref, _results;
-        _ref = this.cat.get_my_indices;
+        _ref = this.cat.get_my_indices();
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           index = _ref[_i];
-          _results.push(index.mark());
+          _results.push(index.mark(switch_on));
         }
         return _results;
       };
@@ -121,17 +118,6 @@
       function Category() {
         return Category.__super__.constructor.apply(this, arguments);
       }
-
-      Category.prototype.update = function(new_value) {
-        var index, sub_indices, _i, _len;
-        this.set_weight(new_value);
-        sub_indices = this.get_my_indices();
-        for (_i = 0, _len = sub_indices.length; _i < _len; _i++) {
-          index = sub_indices[_i];
-          index.update_osc_weight();
-        }
-        return Category.__super__.update.apply(this, arguments);
-      };
 
       Category.prototype.get_my_indices = function() {
         return Index._indices.filter((function(_this) {
@@ -157,13 +143,13 @@
         return this.near_100(sum);
       };
 
-      Category.prototype.mark_cat = function() {
+      Category.prototype.mark_cat = function(switch_on) {
         var cat, _i, _len, _ref, _results;
         _ref = Index._categories;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           cat = _ref[_i];
-          _results.push(cat.mark());
+          _results.push(cat.mark(switch_on));
         }
         return _results;
       };
@@ -200,12 +186,17 @@
         return _results;
       },
       update: function() {
-        var ind, _i, _len, _ref, _results;
+        var cat, ind, _i, _j, _len, _len1, _ref, _ref1, _results;
         _ref = this.indicators;
-        _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           ind = _ref[_i];
-          _results.push(ind.update_osc_weight());
+          ind.update();
+        }
+        _ref1 = this.categories;
+        _results = [];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          cat = _ref1[_j];
+          _results.push(cat.update());
         }
         return _results;
       }

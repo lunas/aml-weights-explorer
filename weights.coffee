@@ -26,17 +26,19 @@ $ ->
 
     get_weight: () -> Index._tangle.getValue( @variable ) or @weight
 
-    update: () -> @mark_cat() if not @weight_sum_is_100()
+    update: () -> @mark_cat( not @weight_sum_is_100() )
 
     weight_sum_is_100: ()-> false
 
-    mark_cat: ()->
+    mark_cat: (switch_on)->
 
     selector: ()-> '[data-var=' + @variable + ']'
 
-    mark: ()-> $( @selector() ).addClass( 'not-100')
-
-    unmark: ()-> $( @selector() ).removeClass( 'not-100' )
+    mark: (switch_on)->
+      if switch_on
+        $( @selector() ).addClass( 'not-100')
+      else
+        $( @selector() ).removeClass( 'not-100' )
 
     near_100: (value) -> Math.abs( value - 100 ) <= 1
 
@@ -51,8 +53,7 @@ $ ->
 
   window.Indicator = class Indicator extends Index
 
-    update: (new_value)->
-      @set_weight( new_value )
+    update: ()->
       @update_osc_weight()
       super
 
@@ -65,18 +66,11 @@ $ ->
     weight_sum_is_100: ()->
       @near_100( @cat.weight_sum() )
 
-    mark_cat: ()-> index.mark() for index in @cat.get_my_indices
+    mark_cat: (switch_on) -> index.mark(switch_on) for index in @cat.get_my_indices()
 
 
 
   window.Category = class Category extends Index
-
-    update: (new_value)->
-      @set_weight(new_value)
-      sub_indices = @get_my_indices()
-      for index in sub_indices
-        index.update_osc_weight()
-      super
 
     get_my_indices: ()->
       Index._indices.filter (e) =>  # use fat arrow to get the instance-this
@@ -94,7 +88,7 @@ $ ->
       0)
       @near_100(sum)
 
-    mark_cat: ()-> cat.mark() for cat in Index._categories
+    mark_cat: (switch_on)-> cat.mark(switch_on) for cat in Index._categories
 
 
 
@@ -144,8 +138,9 @@ $ ->
         this[ cat.variable ] = cat.weight for cat in @categories
 
     update: ()->
-      for ind in @indicators
-        ind.update_osc_weight()
+      ind.update() for ind in @indicators
+      cat.update() for cat in @categories
+
 
   }
 

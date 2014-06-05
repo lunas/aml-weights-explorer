@@ -59,3 +59,19 @@ describe 'Category', ()->
         expect( ind.update_osc_weight).toHaveBeenCalled()
 
     #it 'marks all categories if the sum of their weights is not 100', ()->
+
+  describe 'mark_cat', () ->
+
+    it 'marks each index of the same category, and no others', () ->
+      for index in Index._indices
+        spyOn( index, 'mark' )
+      for cat in Index._categories
+        spyOn( cat, 'mark' )
+
+      category.mark_cat(true)
+
+      for index in Index._indices
+        expect( index.mark ).not.toHaveBeenCalled()
+
+      for cat in Index._categories
+        expect( cat.mark ).toHaveBeenCalled()

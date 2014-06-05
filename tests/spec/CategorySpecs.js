@@ -44,7 +44,7 @@
         return expect(category.weight_sum_is_100()).toBeFalsy();
       });
     });
-    return describe('update', function() {
+    describe('update', function() {
       beforeEach(function() {
         spyOn(ind1, 'update_osc_weight');
         spyOn(ind2, 'update_osc_weight');
@@ -61,6 +61,34 @@
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           ind = _ref[_i];
           _results.push(expect(ind.update_osc_weight).toHaveBeenCalled());
+        }
+        return _results;
+      });
+    });
+    return describe('mark_cat', function() {
+      return it('marks each index of the same category, and no others', function() {
+        var cat, index, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3, _results;
+        _ref = Index._indices;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          index = _ref[_i];
+          spyOn(index, 'mark');
+        }
+        _ref1 = Index._categories;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          cat = _ref1[_j];
+          spyOn(cat, 'mark');
+        }
+        category.mark_cat(true);
+        _ref2 = Index._indices;
+        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+          index = _ref2[_k];
+          expect(index.mark).not.toHaveBeenCalled();
+        }
+        _ref3 = Index._categories;
+        _results = [];
+        for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
+          cat = _ref3[_l];
+          _results.push(expect(cat.mark).toHaveBeenCalled());
         }
         return _results;
       });

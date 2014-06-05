@@ -4,7 +4,7 @@ describe 'Index', () ->
 
   beforeEach () ->
     categ = new Category( 'ml/tf', 60, 'osc' )
-    index  = new Indicator( 'fatf', 50, categ)
+    index  = new Indicator( 'fatf', 50, categ )
     tangle = {
       setValue: (variable, value)->
       getValue: (variable) ->
@@ -33,3 +33,5 @@ describe 'Index', () ->
 
     it 'returns the correct value', () ->
       expect( index.get_weight() ).toEqual( 55 )
+
+
