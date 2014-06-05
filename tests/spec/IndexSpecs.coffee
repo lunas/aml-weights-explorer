@@ -18,13 +18,13 @@ describe "Indicator", () ->
     it 'should have category "ml_tf"', () ->
       expect( fatf.cat).toEqual( ml_tf )
 
-  describe 'calculate_osc_weight', ()->
+  describe 'update_osc_weight', ()->
 
     it 'should set the correct tangle variable with the calculated weight', ()->
       exp_result = fatf.weight * ml_tf.weight / 100
       spyOn( tangle, 'setValue' )
 
-      fatf.calculate_osc_weight()
+      fatf.update_osc_weight()
       expect( tangle.setValue ).toHaveBeenCalledWith( 'fatf_osc', exp_result )
 
   describe 'weight_sum_is_100', ()->
@@ -42,7 +42,7 @@ describe "Indicator", () ->
   describe 'update', ()->
 
     beforeEach () ->
-      spyOn( fatf, 'calculate_osc_weight')
+      spyOn( fatf, 'update_osc_weight')
       spyOn( fatf, 'weight_sum_is_100').and.returnValue( true )
       fatf.update(70)
 
@@ -50,5 +50,5 @@ describe "Indicator", () ->
       expect( fatf.weight).toEqual( 70 )
 
     it 'updates the osc-weight', ()->
-      expect( fatf.calculate_osc_weight ).toHaveBeenCalled()
+      expect( fatf.update_osc_weight ).toHaveBeenCalled()
 

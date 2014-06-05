@@ -44,9 +44,9 @@ describe 'Category', ()->
   describe 'update', ()->
 
     beforeEach () ->
-      spyOn( ind1, 'calculate_osc_weight')
-      spyOn( ind2, 'calculate_osc_weight')
-      spyOn( ind3, 'calculate_osc_weight')
+      spyOn( ind1, 'update_osc_weight')
+      spyOn( ind2, 'update_osc_weight')
+      spyOn( ind3, 'update_osc_weight')
 
       category.update(70)
 
@@ -55,6 +55,6 @@ describe 'Category', ()->
 
     it 'updates the osc-weights of its indicators', ()->
       for ind in [ ind1, ind2, ind3 ]
-        expect( ind.calculate_osc_weight).toHaveBeenCalled()
+        expect( ind.update_osc_weight).toHaveBeenCalled()
 
     #it 'marks all categories if the sum of their weights is not 100', ()->

@@ -43,9 +43,9 @@
     });
     return describe('update', function() {
       beforeEach(function() {
-        spyOn(ind1, 'calculate_osc_weight');
-        spyOn(ind2, 'calculate_osc_weight');
-        spyOn(ind3, 'calculate_osc_weight');
+        spyOn(ind1, 'update_osc_weight');
+        spyOn(ind2, 'update_osc_weight');
+        spyOn(ind3, 'update_osc_weight');
         return category.update(70);
       });
       it('sets the weight', function() {
@@ -57,7 +57,7 @@
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           ind = _ref[_i];
-          _results.push(expect(ind.calculate_osc_weight).toHaveBeenCalled());
+          _results.push(expect(ind.update_osc_weight).toHaveBeenCalled());
         }
         return _results;
       });

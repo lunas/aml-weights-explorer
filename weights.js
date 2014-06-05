@@ -17,7 +17,15 @@
 
       Index._categories = null;
 
-      Index._tangle = null;
+      Index._model_class = null;
+
+      Index.prototype.set_weight = function() {
+        return this.weight = Index._model_class[this.variable];
+      };
+
+      Index.prototype.get_weight = function() {
+        return Index._model_class[this.variable] || this.weight;
+      };
 
       Index.prototype.update = function() {
         if (!this.weight_sum_is_100()) {
@@ -47,20 +55,16 @@
         return Math.abs(value - 100) <= 1;
       };
 
-      Index.set_tangle_value = function(variable, value) {
-        return this._tangle.setValue(variable, value);
-      };
-
       Index.set_indices = function(indices) {
-        return this._indices = indices;
+        return Index._indices = indices;
       };
 
       Index.set_categories = function(categories) {
-        return this._categories = categories;
+        return Index._categories = categories;
       };
 
-      Index.set_tangle = function(tangle) {
-        return this._tangle = tangle;
+      Index.set_model_class = function(mc) {
+        return Index._model_class = mc;
       };
 
       return Index;
@@ -74,15 +78,19 @@
       }
 
       Indicator.prototype.update = function(new_value) {
-        this.weight = new_value;
-        this.calculate_osc_weight();
+        this.set_weight(new_value);
+        this.update_osc_weight();
         return Indicator.__super__.update.apply(this, arguments);
       };
 
+      Indicator.prototype.update_osc_weight = function() {
+        var osc_variable;
+        osc_variable = this.variable + '_osc';
+        return Index._model_class[osc_variable] = this.calculate_osc_weight();
+      };
+
       Indicator.prototype.calculate_osc_weight = function() {
-        var variable;
-        variable = this.variable + '_osc';
-        return Index.set_tangle_value(variable, this.weight * this.cat.weight / 100);
+        return this.get_weight() * this.cat.get_weight() / 100;
       };
 
       Indicator.prototype.weight_sum_is_100 = function() {
@@ -116,7 +124,7 @@
         sub_indices = this.get_my_indices();
         for (_i = 0, _len = sub_indices.length; _i < _len; _i++) {
           index = sub_indices[_i];
-          index.calculate_osc_weight();
+          index.update_osc_weight();
         }
         return Category.__super__.update.apply(this, arguments);
       };
@@ -133,14 +141,14 @@
         var sub_indices;
         sub_indices = this.get_my_indices();
         return sub_indices.reduce(function(sum, element) {
-          return sum + element.weight;
+          return sum + element.get_weight();
         }, 0);
       };
 
       Category.prototype.weight_sum_is_100 = function() {
         var sum;
         sum = Index._categories.reduce(function(sum, element) {
-          return sum + element.weight;
+          return sum + element.get_weight();
         }, 0);
         return this.near_100(sum);
       };
@@ -160,26 +168,38 @@
 
     })(Index);
     tangle = new Tangle(document.getElementById("weights-ui"), {
+      categories: [new Category('ml_tf', 65, 'osc'), new Category('corruption_risk', 10, 'osc'), new Category('fin_transpar_std', 15, 'osc'), new Category('public_transpar_account', 5, 'osc'), new Category('political_legal_risk', 5, 'osc')],
+      indicators: [],
       initialize: function() {
-        var cat, categories, ind, indicators, _i, _j, _len, _len1, _results;
-        categories = [new Category('ml/tf', 65, 'osc'), new Category('corruption_risk', 10, 'osc'), new Category('fin_transpar_std', 15, 'osc'), new Category('public_transpar_account', 5, 'osc'), new Category('political_legal_risk', 5, 'osc')];
-        indicators = [new Indicator('fatf', 46.15, categories[0]), new Indicator('fin_secrecy', 38.46, categories[0]), new Indicator('us_incsr', 15.18, categories[0]), Indicator, new Indicator('ti_cpi', 100, categories[1]), Indicator, new Indicator('business_disclosure', 12.5, categories[2]), new Indicator('auditing_std', 37.5, categories[2]), new Indicator('security_eschange, 37,5', categories[2]), new Indicator('fin_sector', 12.5, categories[2]), Indicator, new Indicator('open_budget', 33.33, categories[3]), new Indicator('transpar_account_corr', 33.33, categories[3]), new Indicator('political_disclosure', 33.33, categories[3]), Indicator, new Indicator('instit_strength', 33.33, categories[4]), new Indicator('rule_of_law', 33.33, categories[4]), new Indicator('freedom_house', 33.33, categories[4])];
-        Index.set_indices(indicators);
-        Index.set_categories(categories);
-        Index.set_tangle(this);
-        for (_i = 0, _len = indicators.length; _i < _len; _i++) {
-          ind = indicators[_i];
-          this[ind.variable] = ind.weight;
+        var cat, ind, _i, _j, _len, _len1, _ref, _ref1, _results;
+        this.indicators = [new Indicator('fatf', 46.15, this.categories[0]), new Indicator('fin_secrecy', 38.46, this.categories[0]), new Indicator('us_incsr', 15.18, this.categories[0]), new Indicator('ti_cpi', 100, this.categories[1]), new Indicator('business_disclosure', 12.5, this.categories[2]), new Indicator('auditing_std', 37.5, this.categories[2]), new Indicator('security_exchange', 37.5, this.categories[2]), new Indicator('fin_sector', 12.5, this.categories[2]), new Indicator('open_budget', 33.33, this.categories[3]), new Indicator('transpar_account_corr', 33.33, this.categories[3]), new Indicator('political_disclosure', 33.33, this.categories[3]), new Indicator('instit_strength', 33.33, this.categories[4]), new Indicator('rule_of_law', 33.33, this.categories[4]), new Indicator('freedom_house', 33.33, this.categories[4])];
+        Index.set_indices(this.indicators);
+        Index.set_categories(this.categories);
+        Index.set_model_class(this);
+        _ref = this.indicators;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          ind = _ref[_i];
+          this[ind.variable] = ind.get_weight();
           this[ind.variable + '_osc'] = ind.calculate_osc_weight();
         }
+        _ref1 = this.categories;
         _results = [];
-        for (_j = 0, _len1 = categories.length; _j < _len1; _j++) {
-          cat = categories[_j];
-          _results.push(this[cat.variable + '_cat'] = cat.weight);
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          cat = _ref1[_j];
+          _results.push(this[cat.variable] = cat.get_weight());
         }
         return _results;
       },
-      update: function() {}
+      update: function() {
+        var ind, _i, _len, _ref, _results;
+        _ref = this.indicators;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          ind = _ref[_i];
+          _results.push(ind.update_osc_weight());
+        }
+        return _results;
+      }
     });
     d3.csv("aml.csv", function(error, data) {
       if (error) {

@@ -19,12 +19,12 @@
         return expect(fatf.cat).toEqual(ml_tf);
       });
     });
-    describe('calculate_osc_weight', function() {
+    describe('update_osc_weight', function() {
       return it('should set the correct tangle variable with the calculated weight', function() {
         var exp_result;
         exp_result = fatf.weight * ml_tf.weight / 100;
         spyOn(tangle, 'setValue');
-        fatf.calculate_osc_weight();
+        fatf.update_osc_weight();
         return expect(tangle.setValue).toHaveBeenCalledWith('fatf_osc', exp_result);
       });
     });
@@ -40,7 +40,7 @@
     });
     return describe('update', function() {
       beforeEach(function() {
-        spyOn(fatf, 'calculate_osc_weight');
+        spyOn(fatf, 'update_osc_weight');
         spyOn(fatf, 'weight_sum_is_100').and.returnValue(true);
         return fatf.update(70);
       });
@@ -48,7 +48,7 @@
         return expect(fatf.weight).toEqual(70);
       });
       return it('updates the osc-weight', function() {
-        return expect(fatf.calculate_osc_weight).toHaveBeenCalled();
+        return expect(fatf.update_osc_weight).toHaveBeenCalled();
       });
     });
   });
