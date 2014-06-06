@@ -252,7 +252,7 @@ $ ->
       .data dataset
       .enter()
       .append 'text'
-      .text (d) -> d.country
+      .text (d) -> d.country + ' ' + d.rank_old + ',' + d.rank_new
       .attr
         'x': (d) -> x_scale d.osc_old
         'y': (d) -> y_scale d.osc_new
@@ -305,6 +305,18 @@ $ ->
       return 0
 
   get_comparison_data = (data_old, data_new) ->
+    # add rank
+    data_old.sort( by_('OVERALL_SCORE', true) )
+    rank = 1
+    for row in data_old
+      row.rank = rank++
+
+    data_new.sort( by_('OVERALL_SCORE', true) )
+
+    rank = 1
+    for row in data_new
+      row.rank = rank++
+
     # sort both by country so we're sure thing's aren't mixed up
     data_old.sort( by_('country') )
     data_new.sort( by_('country') )
@@ -314,7 +326,9 @@ $ ->
       osc_old: data_old[i].OVERALL_SCORE
       osc_new: data_new[i].OVERALL_SCORE
 
-###
+      rank_old: data_old[i].rank
+      rank_new: data_new[i].rank
 
-  vV9aZrU@1$8@p@9ty&@uy@k
-###
+      ###
+
+      ###

@@ -316,7 +316,7 @@
         return y_scale(d.osc_new);
       }).attr('r', 3);
       svg.selectAll('text').data(dataset).enter().append('text').text(function(d) {
-        return d.country;
+        return d.country + ' ' + d.rank_old + ',' + d.rank_new;
       }).attr({
         'x': function(d) {
           return x_scale(d.osc_old);
@@ -364,25 +364,36 @@
       };
     };
     return get_comparison_data = function(data_old, data_new) {
-      var i, _i, _ref, _results;
+      var i, rank, row, _i, _j, _k, _len, _len1, _ref, _results;
+      data_old.sort(by_('OVERALL_SCORE', true));
+      rank = 1;
+      for (_i = 0, _len = data_old.length; _i < _len; _i++) {
+        row = data_old[_i];
+        row.rank = rank++;
+      }
+      data_new.sort(by_('OVERALL_SCORE', true));
+      rank = 1;
+      for (_j = 0, _len1 = data_new.length; _j < _len1; _j++) {
+        row = data_new[_j];
+        row.rank = rank++;
+      }
       data_old.sort(by_('country'));
       data_new.sort(by_('country'));
       _results = [];
-      for (i = _i = 0, _ref = data_old.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      for (i = _k = 0, _ref = data_old.length - 1; 0 <= _ref ? _k <= _ref : _k >= _ref; i = 0 <= _ref ? ++_k : --_k) {
         _results.push({
           country: data_old[i].country,
           osc_old: data_old[i].OVERALL_SCORE,
-          osc_new: data_new[i].OVERALL_SCORE
+          osc_new: data_new[i].OVERALL_SCORE,
+          rank_old: data_old[i].rank,
+          rank_new: data_new[i].rank
         });
+
+        /*
+         */
       }
       return _results;
     };
   });
-
-
-  /*
-  
-    vV9aZrU@1$8@p@9ty&@uy@k
-   */
 
 }).call(this);
