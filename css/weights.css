@@ -8,3 +8,7 @@ table#weights-ui td {
 .not-100 {
     background-color: orange;
 }
+
+.btn-group {
+    margin: 10px;
+}

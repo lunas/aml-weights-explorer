@@ -4,7 +4,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   $(function() {
-    var Category, Index, Indicator, model, render_ranking, render_scatterplot, tangle;
+    var Calculater, Category, Index, Indicator, calculator, model, render_ranking, render_scatterplot, tangle;
     tangle = new Tangle(document.getElementById("weights-ui"), {
       initialize: function() {},
       update: function() {}
@@ -29,6 +29,10 @@
 
       Index.prototype.get_weight = function() {
         return Index._tangle.getValue(this.variable) || this.weight;
+      };
+
+      Index.prototype.get_osc_weight = function() {
+        return Index._tangle.getValue(this.variable + '_osc');
       };
 
       Index.prototype.update = function() {
@@ -158,11 +162,11 @@
 
     })(Index);
     model = {
-      categories: [new Category('ml_tf', 65, 'osc'), new Category('corruption_risk', 10, 'osc'), new Category('fin_transpar_std', 15, 'osc'), new Category('public_transpar_account', 5, 'osc'), new Category('political_legal_risk', 5, 'osc')],
+      categories: [new Category('ML_TF', 65, 'osc'), new Category('CORRUPTION_RISK', 10, 'osc'), new Category('FIN_TRANSPAR_STD', 15, 'osc'), new Category('PUBLIC_TRANSPAR_ACCOUNT', 5, 'osc'), new Category('POLITICAL_LEGAL_RISK', 5, 'osc')],
       indicators: [],
       initialize: function() {
         var cat, ind, _i, _len, _ref, _results;
-        this.indicators = [new Indicator('fatf', 46.15, this.categories[0]), new Indicator('fin_secrecy', 38.46, this.categories[0]), new Indicator('us_incsr', 15.18, this.categories[0]), new Indicator('ti_cpi', 100, this.categories[1]), new Indicator('business_disclosure', 12.5, this.categories[2]), new Indicator('auditing_std', 37.5, this.categories[2]), new Indicator('security_exchange', 37.5, this.categories[2]), new Indicator('fin_sector', 12.5, this.categories[2]), new Indicator('open_budget', 33.33, this.categories[3]), new Indicator('transpar_account_corr', 33.33, this.categories[3]), new Indicator('political_disclosure', 33.33, this.categories[3]), new Indicator('instit_strength', 33.33, this.categories[4]), new Indicator('rule_of_law', 33.33, this.categories[4]), new Indicator('freedom_house', 33.33, this.categories[4])];
+        this.indicators = [new Indicator('fatf', 46.15, this.categories[0]), new Indicator('fin_secrecy', 38.46, this.categories[0]), new Indicator('us_incsr', 15.18, this.categories[0]), new Indicator('ti_cpi', 100, this.categories[1]), new Indicator('wb_business_disclosure', 12.5, this.categories[2]), new Indicator('wef_auditing_and_reporting_std', 37.5, this.categories[2]), new Indicator('wef_security_exchange_reg', 37.5, this.categories[2]), new Indicator('wb_fin_sector_reg', 12.5, this.categories[2]), new Indicator('open_budget', 33.33, this.categories[3]), new Indicator('wb_transpar_account_corruption', 33.33, this.categories[3]), new Indicator('idea_political_disclosure', 33.33, this.categories[3]), new Indicator('wef_instit_strength', 33.33, this.categories[4]), new Indicator('rule_of_law', 33.33, this.categories[4]), new Indicator('freedom_house', 33.33, this.categories[4])];
         Index.set_indices(this.indicators);
         Index.set_categories(this.categories);
         Index.set_tangle(tangle);
@@ -202,24 +206,85 @@
       }
     };
     tangle.setModel(model);
+    window.Calculator = Calculater = (function() {
+      function Calculater(indices) {
+        this.indices = indices;
+        this.data = [];
+      }
+
+      Calculater.prototype.update_country_osc = function() {
+        var row, _i, _len, _ref, _results;
+        _ref = this.data;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          row = _ref[_i];
+          _results.push({
+            country: row.country,
+            OVERALL_SCORE: this.calculate_osc(row)
+          });
+        }
+        return _results;
+      };
+
+      Calculater.prototype.calculate_osc = function(row) {
+        var sum;
+        sum = this.indices.reduce(function(sum, index) {
+          var value;
+          value = row[index.variable];
+          if (isNaN(value)) {
+            return sum;
+          }
+          sum.total += index.get_osc_weight() * value;
+          sum.weight_total += index.get_osc_weight();
+          return sum;
+        }, {
+          total: 0,
+          weight_total: 0
+        });
+        return sum.total / sum.weight_total;
+      };
+
+      Calculater.prototype.ready = function() {
+        return this.data.length > 0;
+      };
+
+      Calculater.prototype.set_data = function(d) {
+        return this.data = d;
+      };
+
+      Calculater.prototype.get_indices = function() {
+        return this.indices;
+      };
+
+      return Calculater;
+
+    })();
+    calculator = new Calculator(Index._indices);
+    d3.select('#update_ranking').on('click', function() {
+      if (calculator.ready()) {
+        return render_ranking(calculator.update_country_osc());
+      }
+    });
     d3.csv("aml.csv", function(error, data) {
       if (error) {
         console.log(error);
         return;
       }
+      calculator.set_data(data);
       render_ranking(data);
-      return render_scatterplot(data);
+      return render_scatterplot();
     });
     render_ranking = function(aml) {
       var list;
-      list = d3.select('.ranking').append('table');
+      list = d3.select('.ranking');
+      list.selectAll('tr').remove();
       return list.selectAll('tr').data(aml).enter().append('tr').html(function(row) {
         var s;
         s = '<td>' + row.country + '</td>';
-        return s += '<td>' + d3.round(row["OVERALL.SCORE"], 2) + '</td>';
+        return s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>';
       });
     };
-    return render_scatterplot = function(aml) {};
+    return render_scatterplot = function() {};
   });
 
 }).call(this);

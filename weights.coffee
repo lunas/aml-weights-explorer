@@ -24,7 +24,8 @@ $ ->
       @weight = value
       Index._tangle.setValue( @variable, @weight )
 
-    get_weight: () -> Index._tangle.getValue( @variable ) or @weight
+    get_weight:     () -> Index._tangle.getValue( @variable ) or @weight
+    get_osc_weight: () -> Index._tangle.getValue( @variable + '_osc' )
 
     update: () -> @mark_cat( not @weight_sum_is_100() )
 
@@ -94,11 +95,11 @@ $ ->
 
   model = {
     categories: [
-      new Category 'ml_tf', 65, 'osc'
-      new Category 'corruption_risk', 10, 'osc'
-      new Category 'fin_transpar_std', 15, 'osc'
-      new Category 'public_transpar_account', 5, 'osc'
-      new Category 'political_legal_risk', 5, 'osc'
+      new Category 'ML_TF', 65, 'osc'
+      new Category 'CORRUPTION_RISK', 10, 'osc'
+      new Category 'FIN_TRANSPAR_STD', 15, 'osc'
+      new Category 'PUBLIC_TRANSPAR_ACCOUNT', 5, 'osc'
+      new Category 'POLITICAL_LEGAL_RISK', 5, 'osc'
     ]
     indicators: []
 
@@ -111,16 +112,16 @@ $ ->
 
         new Indicator 'ti_cpi', 100, @categories[1]
 
-        new Indicator 'business_disclosure', 12.5, @categories[2]
-        new Indicator 'auditing_std', 37.5, @categories[2]
-        new Indicator 'security_exchange', 37.5, @categories[2]
-        new Indicator 'fin_sector', 12.5, @categories[2]
+        new Indicator 'wb_business_disclosure', 12.5, @categories[2]
+        new Indicator 'wef_auditing_and_reporting_std', 37.5, @categories[2]
+        new Indicator 'wef_security_exchange_reg', 37.5, @categories[2]
+        new Indicator 'wb_fin_sector_reg', 12.5, @categories[2]
 
         new Indicator 'open_budget', 33.33, @categories[3]
-        new Indicator 'transpar_account_corr', 33.33, @categories[3]
-        new Indicator 'political_disclosure', 33.33, @categories[3]
+        new Indicator 'wb_transpar_account_corruption', 33.33, @categories[3]
+        new Indicator 'idea_political_disclosure', 33.33, @categories[3]
 
-        new Indicator 'instit_strength', 33.33, @categories[4]
+        new Indicator 'wef_instit_strength', 33.33, @categories[4]
         new Indicator 'rule_of_law', 33.33, @categories[4]
         new Indicator 'freedom_house', 33.33, @categories[4]
       ]
@@ -141,30 +142,67 @@ $ ->
       ind.update() for ind in @indicators
       cat.update() for cat in @categories
 
-
   }
 
-  tangle.setModel( model )
+  tangle.setModel( model )  # now set the real model
+
+  ##################### OSC calculation based on updated weights
+
+  window.Calculator = class Calculater
+
+    constructor: (@indices) -> @data = []
+
+    update_country_osc: ()->
+      for row in @data
+        {country: row.country, OVERALL_SCORE: @calculate_osc( row ) }
+
+    calculate_osc: ( row ) ->
+      sum = @indices.reduce( (sum, index) ->
+        value = row[ index.variable ]
+        return sum if isNaN(value)
+        sum.total += index.get_osc_weight() * value
+        sum.weight_total += index.get_osc_weight()
+        sum
+      {total: 0, weight_total: 0})
+      sum.total / sum.weight_total
+
+    ready: () -> @data.length > 0
+
+    set_data: (d) -> @data = d
+    get_indices: () -> @indices
+
+
+
+  calculator = new Calculator(Index._indices)
+
+  ##################### Buttons to update and reset
+
+  d3.select('#update_ranking').on 'click', ()->
+    if calculator.ready()
+      render_ranking( calculator.update_country_osc() )
 
   ##################### D3
+
   d3.csv "aml.csv", (error, data) ->
     if error
       console.log(error)
       return
 
+    calculator.set_data(data)
     render_ranking(data)
-    render_scatterplot(data)
+    render_scatterplot()
 
 
   render_ranking = (aml) ->
-    list = d3.select('.ranking').append('table')
+    list = d3.select('.ranking')
+    list.selectAll('tr').remove()
     list.selectAll('tr')
       .data(aml)
       .enter()
       .append('tr')
       .html (row)->
         s = '<td>' + row.country + '</td>'
-        s += '<td>' + d3.round(row["OVERALL.SCORE"], 2) + '</td>'
+        s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>'
 
 
-  render_scatterplot = (aml) ->
+  render_scatterplot = () ->
