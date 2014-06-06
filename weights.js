@@ -4,7 +4,10 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   $(function() {
-    var Calculater, Category, Index, Indicator, calculator, model, render_ranking, render_scatterplot, tangle;
+    var Calculater, Category, Index, Indicator, by_, calculator, get_comparison_data, model, orig_aml_data, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle;
+    scatter_width = 1000;
+    scatter_height = 1000;
+    scatter_padding = 40;
     tangle = new Tangle(document.getElementById("weights-ui"), {
       initialize: function() {},
       update: function() {}
@@ -261,30 +264,125 @@
     })();
     calculator = new Calculator(Index._indices);
     d3.select('#update_ranking').on('click', function() {
+      var data;
       if (calculator.ready()) {
-        return render_ranking(calculator.update_country_osc());
+        data = calculator.update_country_osc();
+        render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)));
+        render_ranking('#ranking_country', data.sort(by_('country')));
+        return render_scatterplot(data);
       }
     });
+    jQuery('#display').tabs();
+    orig_aml_data = null;
     d3.csv("aml.csv", function(error, data) {
       if (error) {
         console.log(error);
         return;
       }
+      orig_aml_data = data;
       calculator.set_data(data);
-      render_ranking(data);
-      return render_scatterplot();
+      render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)));
+      render_ranking('#ranking_country', data.sort(by_('country')));
+      return render_scatterplot(data);
     });
-    render_ranking = function(aml) {
+    render_ranking = function(selector, data) {
       var list;
-      list = d3.select('.ranking');
+      list = d3.select(selector + ' table');
       list.selectAll('tr').remove();
-      return list.selectAll('tr').data(aml).enter().append('tr').html(function(row) {
+      return list.selectAll('tr').data(data).order().enter().append('tr').html(function(row) {
         var s;
         s = '<td>' + row.country + '</td>';
         return s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>';
       });
     };
-    return render_scatterplot = function() {};
+    render_scatterplot = function(data) {
+      var dataset, svg, x_axis, x_scale, y_axis, y_scale;
+      dataset = get_comparison_data(orig_aml_data, data);
+      d3.select('#scatter svg').remove();
+      svg = d3.select("#scatter").append('svg').attr("width", scatter_width).attr("height", scatter_height);
+      x_scale = d3.scale.linear().domain([
+        0, d3.max(dataset, function(d) {
+          return d.osc_old;
+        })
+      ]).range([scatter_padding, scatter_width - 3 * scatter_padding]);
+      y_scale = d3.scale.linear().domain([
+        0, d3.max(dataset, function(d) {
+          return d.osc_new;
+        })
+      ]).range([scatter_height - scatter_padding, scatter_padding]);
+      svg.selectAll("circle").data(dataset).enter().append("circle").attr('cx', function(d) {
+        return x_scale(d.osc_old);
+      }).attr('cy', function(d) {
+        return y_scale(d.osc_new);
+      }).attr('r', 3);
+      svg.selectAll('text').data(dataset).enter().append('text').text(function(d) {
+        return d.country;
+      }).attr({
+        'x': function(d) {
+          return x_scale(d.osc_old);
+        },
+        'y': function(d) {
+          return y_scale(d.osc_new);
+        },
+        'font-family': 'sans-serif',
+        'font-size': '11px',
+        fill: 'blue'
+      });
+      x_axis = d3.svg.axis().scale(x_scale).orient("bottom");
+      y_axis = d3.svg.axis().scale(y_scale).orient("left");
+      svg.append('g').attr('class', 'axis').attr('transform', 'translate(0,' + (scatter_height - scatter_padding) + ')').call(x_axis);
+      svg.append('g').attr('class', 'axis').attr('transform', 'translate(' + scatter_padding + ', 0)').call(y_axis);
+      svg.append('text').attr({
+        "class": 'x label',
+        'text-anchor': 'end',
+        x: scatter_width - 3 * scatter_padding,
+        y: scatter_height - 2
+      }).text('Ranking according to hitherto AML weighting');
+      return svg.append('text').attr({
+        "class": 'y label',
+        'text-anchor': 'end',
+        y: 2,
+        dy: '.75em',
+        dx: -scatter_padding,
+        transform: 'rotate(-90)'
+      }).text('Ranking according to new weights');
+    };
+    by_ = function(key, reverse) {
+      if (reverse == null) {
+        reverse = false;
+      }
+      return function(a, b) {
+        var ret;
+        ret = reverse ? -1 : 1;
+        if (a[key] > b[key]) {
+          return ret;
+        }
+        if (a[key] < b[key]) {
+          return -ret;
+        }
+        return 0;
+      };
+    };
+    return get_comparison_data = function(data_old, data_new) {
+      var i, _i, _ref, _results;
+      data_old.sort(by_('country'));
+      data_new.sort(by_('country'));
+      _results = [];
+      for (i = _i = 0, _ref = data_old.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push({
+          country: data_old[i].country,
+          osc_old: data_old[i].OVERALL_SCORE,
+          osc_new: data_new[i].OVERALL_SCORE
+        });
+      }
+      return _results;
+    };
   });
+
+
+  /*
+  
+    vV9aZrU@1$8@p@9ty&@uy@k
+   */
 
 }).call(this);

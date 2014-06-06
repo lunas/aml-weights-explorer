@@ -3,6 +3,7 @@ table#weights-ui {
 }
 table#weights-ui td {
     border: 1px solid grey;
+    padding: 2px;
 }
 
 .not-100 {
@@ -11,4 +12,18 @@ table#weights-ui td {
 
 .btn-group {
     margin: 10px;
+}
+
+/* ----------- scatter plot --------- */
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
 }

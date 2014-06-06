@@ -1,5 +1,12 @@
 
 $ ->
+
+  ##################### global display variables
+
+  scatter_width   = 1000
+  scatter_height  = 1000
+  scatter_padding = 40
+
   ##################### Tangle
 
   # Need to create a tangle first because a reference to it is required by the Index class.
@@ -179,25 +186,36 @@ $ ->
 
   d3.select('#update_ranking').on 'click', ()->
     if calculator.ready()
-      render_ranking( calculator.update_country_osc() )
+      data = calculator.update_country_osc()
+      render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ))
+      render_ranking( '#ranking_country', data.sort( by_('country') ))
+      render_scatterplot(data)
+
+  jQuery('#display').tabs()
 
   ##################### D3
+
+  # global variable that keeps the original AML ranking as of June 2014
+  orig_aml_data = null
 
   d3.csv "aml.csv", (error, data) ->
     if error
       console.log(error)
       return
 
+    orig_aml_data = data
     calculator.set_data(data)
-    render_ranking(data)
-    render_scatterplot()
+    render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ))
+    render_ranking( '#ranking_country', data.sort( by_('country') ))
+    render_scatterplot(data)
 
 
-  render_ranking = (aml) ->
-    list = d3.select('.ranking')
+  render_ranking = (selector, data) ->
+    list = d3.select( selector + ' table' )
     list.selectAll('tr').remove()
     list.selectAll('tr')
-      .data(aml)
+      .data(data)
+      .order()
       .enter()
       .append('tr')
       .html (row)->
@@ -205,4 +223,98 @@ $ ->
         s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>'
 
 
-  render_scatterplot = () ->
+  render_scatterplot = (data) ->
+    dataset = get_comparison_data(orig_aml_data, data)
+
+    d3.select('#scatter svg').remove()
+    svg = d3.select "#scatter"
+      .append 'svg'
+      .attr "width",  scatter_width
+      .attr "height", scatter_height
+
+    x_scale = d3.scale.linear()
+    .domain [ 0, d3.max dataset, (d) -> d.osc_old ]
+    .range  [ scatter_padding, scatter_width - 3 * scatter_padding ]
+
+    y_scale = d3.scale.linear()
+    .domain [ 0, d3.max dataset, (d) -> d.osc_new ]
+    .range  [ scatter_height - scatter_padding, scatter_padding ]
+
+    svg.selectAll "circle"
+      .data dataset
+      .enter()
+      .append "circle"
+      .attr 'cx', (d) -> x_scale d.osc_old
+      .attr 'cy', (d) -> y_scale d.osc_new
+      .attr 'r', 3
+
+    svg.selectAll 'text'
+      .data dataset
+      .enter()
+      .append 'text'
+      .text (d) -> d.country
+      .attr
+        'x': (d) -> x_scale d.osc_old
+        'y': (d) -> y_scale d.osc_new
+        'font-family': 'sans-serif'
+        'font-size': '11px'
+        fill: 'blue'
+
+    x_axis = d3.svg.axis().scale(x_scale).orient("bottom")
+    y_axis = d3.svg.axis().scale(y_scale).orient("left")
+
+    svg.append('g')
+    .attr('class', 'axis')
+    .attr 'transform', 'translate(0,' + (scatter_height - scatter_padding ) + ')'
+    .call x_axis
+    svg.append('g')
+    .attr('class', 'axis')
+    .attr 'transform', 'translate(' + scatter_padding + ', 0)'
+    .call y_axis
+
+    # add axis labels
+
+    svg.append 'text'
+    .attr
+      class: 'x label'
+      'text-anchor': 'end'
+      x: scatter_width - 3*scatter_padding
+      y: scatter_height - 2
+    .text 'Ranking according to hitherto AML weighting'
+
+    svg.append 'text'
+    .attr
+      class: 'y label'
+      'text-anchor': 'end'
+      y: 2
+      dy: '.75em'
+      dx: - scatter_padding
+      transform: 'rotate(-90)'
+    .text 'Ranking according to new weights'
+
+
+
+#################### Helper
+
+  # returns a sort comparison function
+  by_ = (key, reverse = false) ->
+    (a, b) ->
+      ret = if reverse then -1 else 1
+      return ret  if a[key] > b[key]
+      return -ret if a[key] < b[key]
+      return 0
+
+  get_comparison_data = (data_old, data_new) ->
+    # sort both by country so we're sure thing's aren't mixed up
+    data_old.sort( by_('country') )
+    data_new.sort( by_('country') )
+
+    for i in [ 0..data_old.length-1 ]
+      country: data_old[i].country
+      osc_old: data_old[i].OVERALL_SCORE
+      osc_new: data_new[i].OVERALL_SCORE
+
+###
+
+  vV9aZrU@1$8@p@9ty&@uy@k
+###

@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>D3 Test</title>
   <script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
+  <script type="text/javascript" src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
   <script type="text/javascript" src="bower_components/d3/d3.js"></script>
   <script type="text/javascript" src="lib/mootools.js"></script>
   <script type="text/javascript" src="lib/BVTouchable.js"></script>
@@ -11,11 +13,16 @@
   <script type="text/javascript" src="lib/TangleKit.js"></script>
   <script type="text/javascript" src="lib/sprintf.js"></script>
   <script type="text/javascript" src="weights.js"></script>
+  <link type="text/css" href="bower_components/jquery-ui/themes/smoothness/jquery-ui.css" rel="stylesheet">
   <link type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
-  <link type="text/css" href="css/weights.css" rel="stylesheet">
   <link type="text/css" href="css/TangleKit.css" rel="stylesheet">
+  <link type="text/css" href="css/weights.css" rel="stylesheet">
+
 </head>
 <body>
+
+<div class="container">
+<h1>Basel AML Index: Adjust weights and compare rankings</h1>
 
 <table id="weights-ui">
   <tr>
@@ -126,17 +133,32 @@
     <td class="osc-weight"><span class="TKAdjustableNumber" data-var="POLITICAL_LEGAL_RISK" data-format="%.2f" data-min="0" data-max="100"></span></td>
   </tr>
 </table>
-</div>
 
 <div class="btn-group">
   <button type="button" class="btn btn-default" id="update_ranking">Update ranking!</button>
   <button type="button" class="btn ">Reset</button>
 </div>
 
-<div class="display">
-  <table class="ranking"></table>
-  <div class="scatter"></div>
+
+<div id="display">
+  <h2>Overall Score results</h2>
+  <ul>
+    <li><a href="#ranking_osc">Ranking by Overall Score</a></li>
+    <li><a href="#ranking_country">Ranking by country</a></li>
+    <li><a href="#comparison">Graphic comparison</a></li>
+  </ul>
+  <div id="ranking_osc">
+    <table></table>
+  </div>
+  <div id="ranking_country">
+    <table></table>
+  </div>
+  <div id="comparison">
+    <div id="scatter">
+    </div>
+  </div>
 </div>
 
+</div>
 </body>
 </html> 
