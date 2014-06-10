@@ -44,6 +44,15 @@
         return expect(category.weight_sum_is_100()).toBeFalsy();
       });
     });
+    describe('my_indices_weights_are_100', function() {
+      it('returns true if the sum of the indices belonging to this category is 100', function() {
+        return expect(category.my_indices_weights_are_100()).toBeTruthy();
+      });
+      return it('returns false if the sum of the indices belonging to this category is not 100', function() {
+        ind1.initial_weight = 4;
+        return expect(category.my_indices_weights_are_100()).toBeFalsy();
+      });
+    });
     describe('update', function() {
       beforeEach(function() {
         spyOn(ind1, 'update_osc_weight');

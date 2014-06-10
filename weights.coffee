@@ -86,17 +86,24 @@ $ ->
       Index._indices.filter (e) =>  # use fat arrow to get the instance-this
         e.cat.variable == @variable
 
+    # Returns the sum of the weights of all indicators belonging to this category.
     weight_sum: ()->
       sub_indices = @get_my_indices()
       sub_indices.reduce( (sum, element) ->
         sum + element.get_weight()
       0)
 
+    # Checks the sum of the weight of all categories.
     weight_sum_is_100: ()->
       sum = Index._categories.reduce( (sum, element) ->
         sum + element.get_weight()
       0)
       @near_100(sum)
+
+    # Checks whether the sum of the indices belonging to this category
+    # sum up to 100
+    my_indices_weights_are_100: () ->
+      @near_100( @weight_sum() )
 
     mark_cat: (switch_on)-> cat.mark(switch_on) for cat in Index._categories
 
@@ -175,7 +182,10 @@ $ ->
       {total: 0, weight_total: 0})
       sum.total / sum.weight_total
 
-    ready: () -> @data.length > 0
+    ready: () ->
+      return false if @data.length == 0
+      bad_cats = @categories.filter (cat) -> not cat.my_indices_weights_are_100()
+      bad_cats.length == 0 and @categories[0].weight_sum_is_100()
 
     reset: () ->
       ind.reset() for ind in @indices.concat @categories
@@ -197,6 +207,8 @@ $ ->
       render_ranking( '#ranking_country', data.sort( by_('country') ),
         orig_aml_data.sort( by_('country') ))
       render_scatterplot(data)
+    else
+      alert('Please make sure the weights add up to 100.')
 
   d3.select('#reset').on 'click', ()->
     calculator.reset()
@@ -206,21 +218,19 @@ $ ->
 
   ##################### D3
 
-  # global variable that keeps the original AML ranking as of June 2014
-  orig_aml_data = null
-
-  d3.csv "data/aml-public.csv", (error, data) ->
-    if error
-      console.log(error)
-      return
-
-    orig_aml_data = data
-    calculator.set_data(data)
-    render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ),
-      orig_aml_data.sort( by_('OVERALL_SCORE', true) ))
-    render_ranking( '#ranking_country', data.sort( by_('country') ),
-      orig_aml_data.sort( by_('country') ))
-    render_scatterplot(data)
+#  This only works when the data file served by a webserver:
+#  d3.csv "data/aml-public.csv", (error, data) ->
+#    if error
+#      console.log(error)
+#      return
+#
+#    orig_aml_data = data
+#    calculator.set_data(data)
+#    render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ),
+#      orig_aml_data.sort( by_('OVERALL_SCORE', true) ))
+#    render_ranking( '#ranking_country', data.sort( by_('country') ),
+#      orig_aml_data.sort( by_('country') ))
+#    render_scatterplot(data)
 
 
   render_ranking = (selector, data, orig_data) ->
@@ -342,3 +352,18 @@ $ ->
       osc_new: data_new[i].OVERALL_SCORE
       rank_old: data_old[i].rank
       rank_new: data_new[i].rank
+
+
+################## "Main"
+
+  # global variable that keeps the original AML ranking as of June 2014
+  # orig_aml_data = null
+  # It is defined in the js file that includes a huge json object with all the aml public data
+  # Now we need to set up everything with this data:
+  calculator.set_data(orig_aml_data)
+  render_ranking( '#ranking_osc', orig_aml_data.sort( by_('OVERALL_SCORE', true) ),
+    orig_aml_data.sort( by_('OVERALL_SCORE', true) ))
+  render_ranking( '#ranking_country', orig_aml_data.sort( by_('country') ),
+    orig_aml_data.sort( by_('country') ))
+  render_scatterplot(orig_aml_data)
+

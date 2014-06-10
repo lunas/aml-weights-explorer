@@ -13,7 +13,7 @@ describe 'Category', ()->
     ind6 = new Indicator( 'ind12', 33, category2 )
     tangle = {
       setValue: (variable, value)->
-      getValue: (variable) -> false
+      getValue: (variable) -> false # so get_weight will return initial_weight
     }
     Index.set_tangle( tangle )
     Index.set_indices( [ind1, ind2, ind3, ind4, ind5, ind6] )
@@ -41,6 +41,16 @@ describe 'Category', ()->
     it 'returns false if the sum of all category weights is not 100', ()->
       category2.initial_weight = 22
       expect( category.weight_sum_is_100()).toBeFalsy()
+
+  describe 'my_indices_weights_are_100', () ->
+
+    it 'returns true if the sum of the indices belonging to this category is 100', () ->
+      expect( category.my_indices_weights_are_100() ).toBeTruthy()
+
+    it 'returns false if the sum of the indices belonging to this category is not 100', () ->
+      ind1.initial_weight = 4
+      expect( category.my_indices_weights_are_100() ).toBeFalsy()
+
 
   describe 'update', ()->
 
