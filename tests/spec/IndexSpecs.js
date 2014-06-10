@@ -14,19 +14,30 @@
       };
       return Index.set_tangle(tangle);
     });
+    describe('constructor', function() {
+      it('sets the variable name', function() {
+        return expect(index.variable).toEqual('fatf');
+      });
+      it('sets the initial weight', function() {
+        return expect(index.initial_weight).toEqual(50);
+      });
+      return it('sets a reference to its super-category', function() {
+        return expect(index.cat).toEqual(categ);
+      });
+    });
     describe('set_weight', function() {
       beforeEach(function() {
         spyOn(tangle, 'setValue');
         return index.set_weight(23);
       });
-      it('sets the weight attribute', function() {
-        return expect(index.weight).toEqual(23.);
+      it('does not change the initial_weight attribute', function() {
+        return expect(index.initial_weight).toEqual(50.);
       });
       return it('sets the value via the tangle', function() {
-        return expect(tangle.setValue).toHaveBeenCalled();
+        return expect(tangle.setValue).toHaveBeenCalledWith('fatf', 23);
       });
     });
-    return describe('get_weight', function() {
+    describe('get_weight', function() {
       it('returns the value via the tangle', function() {
         spyOn(tangle, 'getValue');
         index.get_weight();
@@ -34,6 +45,13 @@
       });
       return it('returns the correct value', function() {
         return expect(index.get_weight()).toEqual(55);
+      });
+    });
+    return describe('reset', function() {
+      return it('resets the corresponding tangle weight to initial_weight', function() {
+        spyOn(tangle, 'setValue');
+        index.reset();
+        return expect(tangle.setValue).toHaveBeenCalledWith(index.variable, index.initial_weight);
       });
     });
   });

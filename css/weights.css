@@ -14,6 +14,12 @@ table#weights-ui td {
     margin: 10px;
 }
 
+#display table td {
+    padding: 0 20px 0 0;
+}
+#display table th {
+    padding-bottom: 10px;
+}
 /* ----------- scatter plot --------- */
 
 .axis path,

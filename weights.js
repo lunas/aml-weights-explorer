@@ -13,9 +13,9 @@
       update: function() {}
     });
     window.Index = Index = (function() {
-      function Index(variable, weight, cat) {
+      function Index(variable, initial_weight, cat) {
         this.variable = variable;
-        this.weight = weight;
+        this.initial_weight = initial_weight;
         this.cat = cat;
       }
 
@@ -26,16 +26,19 @@
       Index._tangle = null;
 
       Index.prototype.set_weight = function(value) {
-        this.weight = value;
-        return Index._tangle.setValue(this.variable, this.weight);
+        return Index._tangle.setValue(this.variable, value);
       };
 
       Index.prototype.get_weight = function() {
-        return Index._tangle.getValue(this.variable) || this.weight;
+        return Index._tangle.getValue(this.variable) || this.initial_weight;
       };
 
       Index.prototype.get_osc_weight = function() {
         return Index._tangle.getValue(this.variable + '_osc');
+      };
+
+      Index.prototype.reset = function() {
+        return this.set_weight(this.initial_weight);
       };
 
       Index.prototype.update = function() {
@@ -185,7 +188,7 @@
             _results1 = [];
             for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
               cat = _ref1[_j];
-              _results1.push(this[cat.variable] = cat.weight);
+              _results1.push(this[cat.variable] = cat.initial_weight);
             }
             return _results1;
           }).call(this));
@@ -210,8 +213,9 @@
     };
     tangle.setModel(model);
     window.Calculator = Calculater = (function() {
-      function Calculater(indices) {
+      function Calculater(indices, categories) {
         this.indices = indices;
+        this.categories = categories;
         this.data = [];
       }
 
@@ -251,6 +255,17 @@
         return this.data.length > 0;
       };
 
+      Calculater.prototype.reset = function() {
+        var ind, _i, _len, _ref, _results;
+        _ref = this.indices.concat(this.categories);
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          ind = _ref[_i];
+          _results.push(ind.reset());
+        }
+        return _results;
+      };
+
       Calculater.prototype.set_data = function(d) {
         return this.data = d;
       };
@@ -262,37 +277,45 @@
       return Calculater;
 
     })();
-    calculator = new Calculator(Index._indices);
+    calculator = new Calculator(Index._indices, Index._categories);
     d3.select('#update_ranking').on('click', function() {
       var data;
       if (calculator.ready()) {
         data = calculator.update_country_osc();
-        render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)));
-        render_ranking('#ranking_country', data.sort(by_('country')));
+        render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)), orig_aml_data.sort(by_('OVERALL_SCORE', true)));
+        render_ranking('#ranking_country', data.sort(by_('country')), orig_aml_data.sort(by_('country')));
         return render_scatterplot(data);
       }
     });
+    d3.select('#reset').on('click', function() {
+      calculator.reset();
+      return $('#update_ranking').click();
+    });
     jQuery('#display').tabs();
     orig_aml_data = null;
-    d3.csv("aml.csv", function(error, data) {
+    d3.csv("data/aml-public.csv", function(error, data) {
       if (error) {
         console.log(error);
         return;
       }
       orig_aml_data = data;
       calculator.set_data(data);
-      render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)));
-      render_ranking('#ranking_country', data.sort(by_('country')));
+      render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)), orig_aml_data.sort(by_('OVERALL_SCORE', true)));
+      render_ranking('#ranking_country', data.sort(by_('country')), orig_aml_data.sort(by_('country')));
       return render_scatterplot(data);
     });
-    render_ranking = function(selector, data) {
-      var list;
+    render_ranking = function(selector, data, orig_data) {
+      var header, list;
       list = d3.select(selector + ' table');
       list.selectAll('tr').remove();
-      return list.selectAll('tr').data(data).order().enter().append('tr').html(function(row) {
+      header = '<tr><th>New ranking</th><th></th><th>Old ranking</th><th></th></tr>';
+      list.html(header);
+      return list.selectAll('tr').data(data).order().enter().append('tr').html(function(row, i) {
         var s;
         s = '<td>' + row.country + '</td>';
-        return s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>';
+        s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>';
+        s += '<td>' + orig_data[i].country + '</td>';
+        return s += '<td>' + d3.round(orig_data[i].OVERALL_SCORE, 2) + '</td>';
       });
     };
     render_scatterplot = function(data) {
@@ -325,7 +348,7 @@
           return y_scale(d.osc_new);
         },
         'font-family': 'sans-serif',
-        'font-size': '11px',
+        'font-size': '9px',
         fill: 'blue'
       });
       x_axis = d3.svg.axis().scale(x_scale).orient("bottom");
@@ -337,7 +360,7 @@
         'text-anchor': 'end',
         x: scatter_width - 3 * scatter_padding,
         y: scatter_height - 2
-      }).text('Ranking according to hitherto AML weighting');
+      }).text('Overall score based on old AML weighting');
       return svg.append('text').attr({
         "class": 'y label',
         'text-anchor': 'end',
@@ -345,7 +368,7 @@
         dy: '.75em',
         dx: -scatter_padding,
         transform: 'rotate(-90)'
-      }).text('Ranking according to new weights');
+      }).text('Overall score based on new weights');
     };
     by_ = function(key, reverse) {
       if (reverse == null) {
@@ -388,9 +411,6 @@
           rank_old: data_old[i].rank,
           rank_new: data_new[i].rank
         });
-
-        /*
-         */
       }
       return _results;
     };

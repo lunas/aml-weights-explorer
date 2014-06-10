@@ -21,18 +21,20 @@ $ ->
   # Class variables hold a list of all indicators and categories.
   window.Index = class Index
 
-    constructor: (@variable, @weight, @cat) ->
+    constructor: (@variable, @initial_weight, @cat) ->
 
     @_indices: null
     @_categories: null
     @_tangle: null
 
     set_weight: (value) ->
-      @weight = value
-      Index._tangle.setValue( @variable, @weight )
+      Index._tangle.setValue( @variable, value )
 
-    get_weight:     () -> Index._tangle.getValue( @variable ) or @weight
+    get_weight:     () -> Index._tangle.getValue( @variable ) or @initial_weight
     get_osc_weight: () -> Index._tangle.getValue( @variable + '_osc' )
+
+    reset: () ->
+      @set_weight(@initial_weight)
 
     update: () -> @mark_cat( not @weight_sum_is_100() )
 
@@ -143,7 +145,7 @@ $ ->
         this[ ind.variable + '_osc' ] = ind.calculate_osc_weight()
 
       # initial weights of the categories
-        this[ cat.variable ] = cat.weight for cat in @categories
+        this[ cat.variable ] = cat.initial_weight for cat in @categories
 
     update: ()->
       ind.update() for ind in @indicators
@@ -157,7 +159,7 @@ $ ->
 
   window.Calculator = class Calculater
 
-    constructor: (@indices) -> @data = []
+    constructor: (@indices, @categories) -> @data = []
 
     update_country_osc: ()->
       for row in @data
@@ -175,21 +177,30 @@ $ ->
 
     ready: () -> @data.length > 0
 
+    reset: () ->
+      ind.reset() for ind in @indices.concat @categories
+
     set_data: (d) -> @data = d
     get_indices: () -> @indices
 
 
 
-  calculator = new Calculator(Index._indices)
+  calculator = new Calculator(Index._indices, Index._categories)
 
   ##################### Buttons to update and reset
 
   d3.select('#update_ranking').on 'click', ()->
     if calculator.ready()
       data = calculator.update_country_osc()
-      render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ))
-      render_ranking( '#ranking_country', data.sort( by_('country') ))
+      render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ),
+        orig_aml_data.sort( by_('OVERALL_SCORE', true) ))
+      render_ranking( '#ranking_country', data.sort( by_('country') ),
+        orig_aml_data.sort( by_('country') ))
       render_scatterplot(data)
+
+  d3.select('#reset').on 'click', ()->
+    calculator.reset()
+    $('#update_ranking').click()
 
   jQuery('#display').tabs()
 
@@ -198,29 +209,35 @@ $ ->
   # global variable that keeps the original AML ranking as of June 2014
   orig_aml_data = null
 
-  d3.csv "aml.csv", (error, data) ->
+  d3.csv "data/aml-public.csv", (error, data) ->
     if error
       console.log(error)
       return
 
     orig_aml_data = data
     calculator.set_data(data)
-    render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ))
-    render_ranking( '#ranking_country', data.sort( by_('country') ))
+    render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ),
+      orig_aml_data.sort( by_('OVERALL_SCORE', true) ))
+    render_ranking( '#ranking_country', data.sort( by_('country') ),
+      orig_aml_data.sort( by_('country') ))
     render_scatterplot(data)
 
 
-  render_ranking = (selector, data) ->
+  render_ranking = (selector, data, orig_data) ->
     list = d3.select( selector + ' table' )
     list.selectAll('tr').remove()
+    header = '<tr><th>New ranking</th><th></th><th>Old ranking</th><th></th></tr>'
+    list.html(header)
     list.selectAll('tr')
       .data(data)
       .order()
       .enter()
       .append('tr')
-      .html (row)->
+      .html (row, i)->
         s = '<td>' + row.country + '</td>'
         s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>'
+        s += '<td>' + orig_data[i].country + '</td>'
+        s += '<td>' + d3.round(orig_data[i].OVERALL_SCORE, 2) + '</td>'
 
 
   render_scatterplot = (data) ->
@@ -257,7 +274,7 @@ $ ->
         'x': (d) -> x_scale d.osc_old
         'y': (d) -> y_scale d.osc_new
         'font-family': 'sans-serif'
-        'font-size': '11px'
+        'font-size': '9px'
         fill: 'blue'
 
     x_axis = d3.svg.axis().scale(x_scale).orient("bottom")
@@ -280,7 +297,7 @@ $ ->
       'text-anchor': 'end'
       x: scatter_width - 3*scatter_padding
       y: scatter_height - 2
-    .text 'Ranking according to hitherto AML weighting'
+    .text 'Overall score based on old AML weighting'
 
     svg.append 'text'
     .attr
@@ -290,7 +307,7 @@ $ ->
       dy: '.75em'
       dx: - scatter_padding
       transform: 'rotate(-90)'
-    .text 'Ranking according to new weights'
+    .text 'Overall score based on new weights'
 
 
 
@@ -305,17 +322,15 @@ $ ->
       return 0
 
   get_comparison_data = (data_old, data_new) ->
+
     # add rank
     data_old.sort( by_('OVERALL_SCORE', true) )
     rank = 1
-    for row in data_old
-      row.rank = rank++
+    row.rank = rank++ for row in data_old
 
     data_new.sort( by_('OVERALL_SCORE', true) )
-
     rank = 1
-    for row in data_new
-      row.rank = rank++
+    row.rank = rank++ for row in data_new
 
     # sort both by country so we're sure thing's aren't mixed up
     data_old.sort( by_('country') )
@@ -325,10 +340,5 @@ $ ->
       country: data_old[i].country
       osc_old: data_old[i].OVERALL_SCORE
       osc_new: data_new[i].OVERALL_SCORE
-
       rank_old: data_old[i].rank
       rank_new: data_new[i].rank
-
-      ###
-
-      ###

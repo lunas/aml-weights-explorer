@@ -39,7 +39,7 @@ describe 'Category', ()->
       expect( category.weight_sum_is_100()).toBeTruthy()
 
     it 'returns false if the sum of all category weights is not 100', ()->
-      category2.weight = 22
+      category2.initial_weight = 22
       expect( category.weight_sum_is_100()).toBeFalsy()
 
   describe 'update', ()->
@@ -51,12 +51,15 @@ describe 'Category', ()->
 
       category.update(70)
 
-    it 'sets the weight', ()->
-      expect( category.weight ).toEqual( 70 )
+    it 'does not change its initial_weight', ()->
+      expect( category.initial_weight ).toEqual( 80 )
 
-    it 'updates the osc-weights of its indicators', ()->
-      for ind in [ ind1, ind2, ind3 ]
-        expect( ind.update_osc_weight).toHaveBeenCalled()
+    # category.update doesn't need to update the indicators belonging to
+    # itself, since the tangle.update calls update on each indicator, which
+    # looks at the new category value to calculate the correct values.
+    # it 'updates the osc-weights of its indicators', ()->
+    # for ind in [ ind1, ind2, ind3 ]
+    #    expect( ind.update_osc_weight ).toHaveBeenCalled()
 
     #it 'marks all categories if the sum of their weights is not 100', ()->
 

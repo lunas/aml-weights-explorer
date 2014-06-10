@@ -40,7 +40,7 @@
         return expect(category.weight_sum_is_100()).toBeTruthy();
       });
       return it('returns false if the sum of all category weights is not 100', function() {
-        category2.weight = 22;
+        category2.initial_weight = 22;
         return expect(category.weight_sum_is_100()).toBeFalsy();
       });
     });
@@ -51,18 +51,8 @@
         spyOn(ind3, 'update_osc_weight');
         return category.update(70);
       });
-      it('sets the weight', function() {
-        return expect(category.weight).toEqual(70);
-      });
-      return it('updates the osc-weights of its indicators', function() {
-        var ind, _i, _len, _ref, _results;
-        _ref = [ind1, ind2, ind3];
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          ind = _ref[_i];
-          _results.push(expect(ind.update_osc_weight).toHaveBeenCalled());
-        }
-        return _results;
+      return it('does not change its initial_weight', function() {
+        return expect(category.initial_weight).toEqual(80);
       });
     });
     return describe('mark_cat', function() {

@@ -24,7 +24,7 @@ describe "Indicator", () ->
   describe 'update_osc_weight', ()->
 
     it 'should set the correct tangle variable with the calculated weight', ()->
-      exp_result = index.weight * categ.weight / 100
+      exp_result = index.initial_weight * categ.initial_weight / 100
       spyOn( tangle, 'setValue' )
 
       index.update_osc_weight()

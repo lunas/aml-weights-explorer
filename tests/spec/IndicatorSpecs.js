@@ -26,7 +26,7 @@
     describe('update_osc_weight', function() {
       return it('should set the correct tangle variable with the calculated weight', function() {
         var exp_result;
-        exp_result = index.weight * categ.weight / 100;
+        exp_result = index.initial_weight * categ.initial_weight / 100;
         spyOn(tangle, 'setValue');
         index.update_osc_weight();
         return expect(tangle.setValue).toHaveBeenCalledWith('index_osc', exp_result);
