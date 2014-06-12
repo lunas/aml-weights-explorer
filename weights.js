@@ -4,7 +4,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   $(function() {
-    var Calculater, Category, Index, Indicator, by_, calculator, get_comparison_data, model, orig_data_by_country, orig_data_by_osc, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle;
+    var Calculater, Category, Index, Indicator, by_, calculator, get_comparison_data, model, orig_data, orig_data_by_country, orig_data_by_osc, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle;
     scatter_width = 1000;
     scatter_height = 1000;
     scatter_padding = 40;
@@ -295,7 +295,7 @@
         data = calculator.update_country_osc();
         render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)), orig_data_by_osc);
         render_ranking('#ranking_country', data.sort(by_('country')), orig_data_by_country);
-        return render_scatterplot(data);
+        return render_scatterplot(data, orig_data);
       } else {
         return alert('Please make sure the weights add up to 100.');
       }
@@ -317,9 +317,9 @@
         return s += '<td>' + d3.round(orig_data[i].OVERALL_SCORE, 2) + '</td>';
       });
     };
-    render_scatterplot = function(data) {
+    render_scatterplot = function(data, orig_data) {
       var dataset, svg, x_axis, x_scale, y_axis, y_scale;
-      dataset = get_comparison_data(orig_aml_data, data);
+      dataset = get_comparison_data(orig_data, data);
       d3.select('#scatter svg').remove();
       svg = d3.select("#scatter").append('svg').attr("width", scatter_width).attr("height", scatter_height);
       x_scale = d3.scale.linear().domain([
@@ -416,12 +416,11 @@
     Array.prototype.copy_sort = function(cmp_fct) {
       return this.concat().sort(cmp_fct);
     };
-    orig_data_by_osc = orig_aml_data.copy_sort(by_('OVERALL_SCORE', true));
-    orig_data_by_country = orig_aml_data.sort(by_('country'));
     calculator.set_data(orig_aml_data);
-    render_ranking('#ranking_osc', orig_data_by_osc, orig_data_by_osc);
-    render_ranking('#ranking_country', orig_data_by_country, orig_data_by_country);
-    return render_scatterplot(orig_data_by_osc);
+    orig_data = calculator.update_country_osc();
+    orig_data_by_osc = orig_data.copy_sort(by_('OVERALL_SCORE', true));
+    orig_data_by_country = orig_data.sort(by_('country'));
+    return jQuery('#update_ranking').click();
   });
 
 }).call(this);

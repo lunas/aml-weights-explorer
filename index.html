@@ -27,10 +27,11 @@
 <div class="container">
 <h1>Basel AML Index: Adjust weights and compare rankings</h1>
 
-  <!--<ul>TODO-->
-  <li>osc calculation differs slightly from Excel calculation (r=0.973. This is because of direct calculation
-     of the osc directly from the indicators, not via the categories. Probably introduced by missing values
-  </li>
+
+  <p>Note: Overall score calculation differs slightly from the Excel calculation (r=0.973) currently used to
+    calculate the AML Index. This is because here we directly calcule the osc from the indicators, not via
+    the categories. Probably introduced by missing values.
+  </p>
   </ul>
 <table id="weights-ui">
   <tr>
@@ -151,8 +152,8 @@
 <div id="display">
   <h2>Overall Score results</h2>
   <ul>
-    <li><a href="#ranking_osc">Ranking by Overall Score</a></li>
-    <li><a href="#ranking_country">Ranking by country</a></li>
+    <li><a href="#ranking_osc">Sort by Overall Score</a></li>
+    <li><a href="#ranking_country">Sort by country</a></li>
     <li><a href="#comparison">Graphic comparison</a></li>
   </ul>
   <div id="ranking_osc">
@@ -166,7 +167,7 @@
   <div id="ranking_country">
     <table>
       <thead>
-        <tr><th>New ranking</th><th></th><th>Old ranking</th><th></th></tr>
+        <tr><th>New overall scores</th><th></th><th>Old overeall scores</th><th></th></tr>
       </thead>
       <tbody></tbody>
     </table>

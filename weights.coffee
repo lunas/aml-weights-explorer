@@ -206,7 +206,7 @@ $ ->
         orig_data_by_osc)
       render_ranking( '#ranking_country', data.sort( by_('country') ),
         orig_data_by_country)
-      render_scatterplot(data)
+      render_scatterplot(data, orig_data)
     else
       alert('Please make sure the weights add up to 100.')
 
@@ -248,8 +248,8 @@ $ ->
         s += '<td>' + d3.round(orig_data[i].OVERALL_SCORE, 2) + '</td>'
 
 
-  render_scatterplot = (data) ->
-    dataset = get_comparison_data(orig_aml_data, data)
+  render_scatterplot = (data, orig_data) ->
+    dataset = get_comparison_data(orig_data, data)
 
     d3.select('#scatter svg').remove()
     svg = d3.select "#scatter"
@@ -357,15 +357,21 @@ $ ->
   # add a method to array that only sorts a copy of the array:
   Array.prototype.copy_sort = (cmp_fct) -> this.concat().sort( cmp_fct )
 
-  orig_data_by_osc = orig_aml_data.copy_sort( by_('OVERALL_SCORE', true) )
-  orig_data_by_country = orig_aml_data.sort( by_('country') )
+  calculator.set_data(orig_aml_data)
+  orig_data = calculator.update_country_osc()
+
+  orig_data_by_osc = orig_data.copy_sort( by_('OVERALL_SCORE', true) )
+  orig_data_by_country = orig_data.sort( by_('country') )
+
+  jQuery('#update_ranking').click()
 
   # global variable that keeps the original AML ranking as of June 2014
   # orig_aml_data = null
   # It is defined in the js file that includes a huge json object with all the aml public data
   # Now we need to set up everything with this data:
-  calculator.set_data(orig_aml_data)
-  render_ranking( '#ranking_osc', orig_data_by_osc, orig_data_by_osc )
-  render_ranking( '#ranking_country', orig_data_by_country, orig_data_by_country)
-  render_scatterplot(orig_data_by_osc)
+
+
+#  render_ranking( '#ranking_osc', orig_data_by_osc, orig_data_by_osc )
+#  render_ranking( '#ranking_country', orig_data_by_country, orig_data_by_country)
+#  render_scatterplot(orig_data_by_osc)
 
