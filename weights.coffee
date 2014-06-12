@@ -194,28 +194,6 @@ $ ->
     get_indices: () -> @indices
 
 
-
-  calculator = new Calculator(Index._indices, Index._categories)
-
-  ##################### Buttons to update and reset
-
-  d3.select('#update_ranking').on 'click', ()->
-    if calculator.ready()
-      data = calculator.update_country_osc()
-      render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ),
-        orig_data_by_osc)
-      render_ranking( '#ranking_country', data.sort( by_('country') ),
-        orig_data_by_country)
-      render_scatterplot(data, orig_data)
-    else
-      alert('Please make sure the weights add up to 100.')
-
-  d3.select('#reset').on 'click', ()->
-    calculator.reset()
-    $('#update_ranking').click()
-
-  jQuery('#display').tabs()
-
   ##################### D3
 
 #  This only works when the data file served by a webserver:
@@ -354,9 +332,37 @@ $ ->
 
 ################## "Main"
 
+  # Buttons to update and reset
+
+  d3.select('#update_ranking').on 'click', ()->
+    if calculator.ready()
+      data = calculator.update_country_osc()
+      render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ),
+        orig_data_by_osc)
+      render_ranking( '#ranking_country', data.sort( by_('country') ),
+        orig_data_by_country)
+      render_scatterplot(data, orig_data)
+    else
+      alert('Please make sure the weights add up to 100.')
+
+  d3.select('#reset').on 'click', ()->
+    calculator.reset()
+    $('#update_ranking').click()
+
+  jQuery('#display').tabs()
+
+
+
+
   # add a method to array that only sorts a copy of the array:
   Array.prototype.copy_sort = (cmp_fct) -> this.concat().sort( cmp_fct )
 
+  # global variable that keeps the original AML ranking as of June 2014
+  # orig_aml_data = null
+  # It is defined in the js file that includes a huge json object with all the aml public data
+  # Now we need to set up everything with this data:
+
+  calculator = new Calculator(Index._indices, Index._categories)
   calculator.set_data(orig_aml_data)
   orig_data = calculator.update_country_osc()
 
@@ -365,13 +371,7 @@ $ ->
 
   jQuery('#update_ranking').click()
 
-  # global variable that keeps the original AML ranking as of June 2014
-  # orig_aml_data = null
-  # It is defined in the js file that includes a huge json object with all the aml public data
-  # Now we need to set up everything with this data:
-
-
-#  render_ranking( '#ranking_osc', orig_data_by_osc, orig_data_by_osc )
-#  render_ranking( '#ranking_country', orig_data_by_country, orig_data_by_country)
-#  render_scatterplot(orig_data_by_osc)
-
+  jQuery('#ranking_osc table, #ranking_country table').DataTable(
+    ordering: false
+    paging: false
+  )

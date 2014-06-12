@@ -288,23 +288,6 @@
       return Calculater;
 
     })();
-    calculator = new Calculator(Index._indices, Index._categories);
-    d3.select('#update_ranking').on('click', function() {
-      var data;
-      if (calculator.ready()) {
-        data = calculator.update_country_osc();
-        render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)), orig_data_by_osc);
-        render_ranking('#ranking_country', data.sort(by_('country')), orig_data_by_country);
-        return render_scatterplot(data, orig_data);
-      } else {
-        return alert('Please make sure the weights add up to 100.');
-      }
-    });
-    d3.select('#reset').on('click', function() {
-      calculator.reset();
-      return $('#update_ranking').click();
-    });
-    jQuery('#display').tabs();
     render_ranking = function(selector, data, orig_data) {
       var list;
       list = d3.select(selector + ' table tbody');
@@ -413,14 +396,35 @@
       }
       return _results;
     };
+    d3.select('#update_ranking').on('click', function() {
+      var data;
+      if (calculator.ready()) {
+        data = calculator.update_country_osc();
+        render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)), orig_data_by_osc);
+        render_ranking('#ranking_country', data.sort(by_('country')), orig_data_by_country);
+        return render_scatterplot(data, orig_data);
+      } else {
+        return alert('Please make sure the weights add up to 100.');
+      }
+    });
+    d3.select('#reset').on('click', function() {
+      calculator.reset();
+      return $('#update_ranking').click();
+    });
+    jQuery('#display').tabs();
     Array.prototype.copy_sort = function(cmp_fct) {
       return this.concat().sort(cmp_fct);
     };
+    calculator = new Calculator(Index._indices, Index._categories);
     calculator.set_data(orig_aml_data);
     orig_data = calculator.update_country_osc();
     orig_data_by_osc = orig_data.copy_sort(by_('OVERALL_SCORE', true));
     orig_data_by_country = orig_data.sort(by_('country'));
-    return jQuery('#update_ranking').click();
+    jQuery('#update_ranking').click();
+    return jQuery('#ranking_osc table, #ranking_country table').DataTable({
+      ordering: false,
+      paging: false
+    });
   });
 
 }).call(this);
