@@ -124,7 +124,7 @@ $ ->
       @indicators = [
         new Indicator 'fatf', 46.15, @categories[0]
         new Indicator 'fin_secrecy', 38.46, @categories[0]
-        new Indicator 'us_incsr', 15.18, @categories[0]
+        new Indicator 'us_incsr', 15.38, @categories[0]
 
         new Indicator 'ti_cpi', 100, @categories[1]
 
@@ -203,9 +203,9 @@ $ ->
     if calculator.ready()
       data = calculator.update_country_osc()
       render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ),
-        orig_aml_data.sort( by_('OVERALL_SCORE', true) ))
+        orig_data_by_osc)
       render_ranking( '#ranking_country', data.sort( by_('country') ),
-        orig_aml_data.sort( by_('country') ))
+        orig_data_by_country)
       render_scatterplot(data)
     else
       alert('Please make sure the weights add up to 100.')
@@ -234,10 +234,8 @@ $ ->
 
 
   render_ranking = (selector, data, orig_data) ->
-    list = d3.select( selector + ' table' )
+    list = d3.select( selector + ' table tbody' )
     list.selectAll('tr').remove()
-    header = '<tr><th>New ranking</th><th></th><th>Old ranking</th><th></th></tr>'
-    list.html(header)
     list.selectAll('tr')
       .data(data)
       .order()
@@ -356,14 +354,18 @@ $ ->
 
 ################## "Main"
 
+  # add a method to array that only sorts a copy of the array:
+  Array.prototype.copy_sort = (cmp_fct) -> this.concat().sort( cmp_fct )
+
+  orig_data_by_osc = orig_aml_data.copy_sort( by_('OVERALL_SCORE', true) )
+  orig_data_by_country = orig_aml_data.sort( by_('country') )
+
   # global variable that keeps the original AML ranking as of June 2014
   # orig_aml_data = null
   # It is defined in the js file that includes a huge json object with all the aml public data
   # Now we need to set up everything with this data:
   calculator.set_data(orig_aml_data)
-  render_ranking( '#ranking_osc', orig_aml_data.sort( by_('OVERALL_SCORE', true) ),
-    orig_aml_data.sort( by_('OVERALL_SCORE', true) ))
-  render_ranking( '#ranking_country', orig_aml_data.sort( by_('country') ),
-    orig_aml_data.sort( by_('country') ))
-  render_scatterplot(orig_aml_data)
+  render_ranking( '#ranking_osc', orig_data_by_osc, orig_data_by_osc )
+  render_ranking( '#ranking_country', orig_data_by_country, orig_data_by_country)
+  render_scatterplot(orig_data_by_osc)
 

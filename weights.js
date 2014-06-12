@@ -4,7 +4,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   $(function() {
-    var Calculater, Category, Index, Indicator, by_, calculator, get_comparison_data, model, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle;
+    var Calculater, Category, Index, Indicator, by_, calculator, get_comparison_data, model, orig_data_by_country, orig_data_by_osc, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle;
     scatter_width = 1000;
     scatter_height = 1000;
     scatter_padding = 40;
@@ -176,7 +176,7 @@
       indicators: [],
       initialize: function() {
         var cat, ind, _i, _len, _ref, _results;
-        this.indicators = [new Indicator('fatf', 46.15, this.categories[0]), new Indicator('fin_secrecy', 38.46, this.categories[0]), new Indicator('us_incsr', 15.18, this.categories[0]), new Indicator('ti_cpi', 100, this.categories[1]), new Indicator('wb_business_disclosure', 12.5, this.categories[2]), new Indicator('wef_auditing_and_reporting_std', 37.5, this.categories[2]), new Indicator('wef_security_exchange_reg', 37.5, this.categories[2]), new Indicator('wb_fin_sector_reg', 12.5, this.categories[2]), new Indicator('open_budget', 33.33, this.categories[3]), new Indicator('wb_transpar_account_corruption', 33.33, this.categories[3]), new Indicator('idea_political_disclosure', 33.33, this.categories[3]), new Indicator('wef_instit_strength', 33.33, this.categories[4]), new Indicator('rule_of_law', 33.33, this.categories[4]), new Indicator('freedom_house', 33.33, this.categories[4])];
+        this.indicators = [new Indicator('fatf', 46.15, this.categories[0]), new Indicator('fin_secrecy', 38.46, this.categories[0]), new Indicator('us_incsr', 15.38, this.categories[0]), new Indicator('ti_cpi', 100, this.categories[1]), new Indicator('wb_business_disclosure', 12.5, this.categories[2]), new Indicator('wef_auditing_and_reporting_std', 37.5, this.categories[2]), new Indicator('wef_security_exchange_reg', 37.5, this.categories[2]), new Indicator('wb_fin_sector_reg', 12.5, this.categories[2]), new Indicator('open_budget', 33.33, this.categories[3]), new Indicator('wb_transpar_account_corruption', 33.33, this.categories[3]), new Indicator('idea_political_disclosure', 33.33, this.categories[3]), new Indicator('wef_instit_strength', 33.33, this.categories[4]), new Indicator('rule_of_law', 33.33, this.categories[4]), new Indicator('freedom_house', 33.33, this.categories[4])];
         Index.set_indices(this.indicators);
         Index.set_categories(this.categories);
         Index.set_tangle(tangle);
@@ -293,8 +293,8 @@
       var data;
       if (calculator.ready()) {
         data = calculator.update_country_osc();
-        render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)), orig_aml_data.sort(by_('OVERALL_SCORE', true)));
-        render_ranking('#ranking_country', data.sort(by_('country')), orig_aml_data.sort(by_('country')));
+        render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)), orig_data_by_osc);
+        render_ranking('#ranking_country', data.sort(by_('country')), orig_data_by_country);
         return render_scatterplot(data);
       } else {
         return alert('Please make sure the weights add up to 100.');
@@ -306,11 +306,9 @@
     });
     jQuery('#display').tabs();
     render_ranking = function(selector, data, orig_data) {
-      var header, list;
-      list = d3.select(selector + ' table');
+      var list;
+      list = d3.select(selector + ' table tbody');
       list.selectAll('tr').remove();
-      header = '<tr><th>New ranking</th><th></th><th>Old ranking</th><th></th></tr>';
-      list.html(header);
       return list.selectAll('tr').data(data).order().enter().append('tr').html(function(row, i) {
         var s;
         s = '<td>' + row.country + '</td>';
@@ -415,10 +413,15 @@
       }
       return _results;
     };
+    Array.prototype.copy_sort = function(cmp_fct) {
+      return this.concat().sort(cmp_fct);
+    };
+    orig_data_by_osc = orig_aml_data.copy_sort(by_('OVERALL_SCORE', true));
+    orig_data_by_country = orig_aml_data.sort(by_('country'));
     calculator.set_data(orig_aml_data);
-    render_ranking('#ranking_osc', orig_aml_data.sort(by_('OVERALL_SCORE', true)), orig_aml_data.sort(by_('OVERALL_SCORE', true)));
-    render_ranking('#ranking_country', orig_aml_data.sort(by_('country')), orig_aml_data.sort(by_('country')));
-    return render_scatterplot(orig_aml_data);
+    render_ranking('#ranking_osc', orig_data_by_osc, orig_data_by_osc);
+    render_ranking('#ranking_country', orig_data_by_country, orig_data_by_country);
+    return render_scatterplot(orig_data_by_osc);
   });
 
 }).call(this);
