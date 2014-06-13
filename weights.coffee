@@ -210,24 +210,6 @@ $ ->
     set_data: (d) -> @data = d
     get_indices: () -> @indices
 
-
-  ##################### D3
-
-#  This only works when the data file served by a webserver:
-#  d3.csv "data/aml-public.csv", (error, data) ->
-#    if error
-#      console.log(error)
-#      return
-#
-#    orig_aml_data = data
-#    calculator.set_data(data)
-#    render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ),
-#      orig_aml_data.sort( by_('OVERALL_SCORE', true) ))
-#    render_ranking( '#ranking_country', data.sort( by_('country') ),
-#      orig_aml_data.sort( by_('country') ))
-#    render_scatterplot(data)
-
-
   render_ranking = (selector, data, orig_data) ->
     list = d3.select( selector + ' table tbody' )
     list.selectAll('tr').remove()
@@ -369,21 +351,28 @@ $ ->
   jQuery('#display').tabs()
 
 
-  # global variable that keeps the original AML ranking as of June 2014
-  # orig_aml_data = null
-  # It is defined in the js file that includes a huge json object with all the aml public data
-  # Now we need to set up everything with this data:
+  orig_aml_data = null # global variable that keeps the original AML ranking as of June 2014
+  orig_data = orig_data_by_osc = orig_data_by_country = null
 
   calculator = new Calculator(Index._indices, Index._categories)
-  calculator.set_data(orig_aml_data)
-  orig_data = calculator.update_country_osc()
 
-  orig_data_by_osc = orig_data.copy_sort( by_('OVERALL_SCORE', true) )
-  orig_data_by_country = orig_data.sort( by_('country') )
+  initialize = (data) ->
+    calculator.set_data(data)
+    orig_data = calculator.update_country_osc()
+    orig_data_by_osc = orig_data.copy_sort( by_('OVERALL_SCORE', true) )
+    orig_data_by_country = orig_data.sort( by_('country') )
 
-  jQuery('#update_ranking').click()
+    jQuery('#update_ranking').click()
 
-  jQuery('#ranking_osc table, #ranking_country table').DataTable(
-    ordering: false
-    paging: false
-  )
+    jQuery('#ranking_osc table, #ranking_country table').DataTable(
+      ordering: false
+      paging: false
+    )
+
+  # load the data and initialize
+  d3.csv "data/aml-public.csv", (error, data) ->
+    if error
+      alert(error)
+    else
+      initialize(data)
+
