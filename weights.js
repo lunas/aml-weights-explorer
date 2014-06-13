@@ -3,6 +3,10 @@
   var __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
+  Array.prototype.copy_sort = function(cmp_fct) {
+    return this.concat().sort(cmp_fct);
+  };
+
   $(function() {
     var Calculater, Category, Index, Indicator, by_, calculator, get_comparison_data, model, orig_data, orig_data_by_country, orig_data_by_osc, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle;
     scatter_width = 1000;
@@ -426,9 +430,6 @@
       return $('#update_ranking').click();
     });
     jQuery('#display').tabs();
-    Array.prototype.copy_sort = function(cmp_fct) {
-      return this.concat().sort(cmp_fct);
-    };
     calculator = new Calculator(Index._indices, Index._categories);
     calculator.set_data(orig_aml_data);
     orig_data = calculator.update_country_osc();

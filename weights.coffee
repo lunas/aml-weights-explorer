@@ -1,4 +1,7 @@
 
+# add a method to array that only sorts a copy of the array:
+Array.prototype.copy_sort = (cmp_fct) -> this.concat().sort( cmp_fct )
+
 $ ->
 
   ##################### global display variables
@@ -365,11 +368,6 @@ $ ->
 
   jQuery('#display').tabs()
 
-
-
-
-  # add a method to array that only sorts a copy of the array:
-  Array.prototype.copy_sort = (cmp_fct) -> this.concat().sort( cmp_fct )
 
   # global variable that keeps the original AML ranking as of June 2014
   # orig_aml_data = null

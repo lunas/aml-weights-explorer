@@ -4,7 +4,7 @@
     var categ, categ2, index, index2, index3, tangle;
     categ = categ2 = index = index2 = index3 = tangle = null;
     beforeEach(function() {
-      categ = new Category('ml/tf', 60, 'osc');
+      categ = new Category('ml_tf', 60, 'osc');
       categ2 = new Category('legalrisk', 40, 'osc');
       index = new Indicator('index', 50, categ);
       index2 = new Indicator('us_inscr', 50, categ);
