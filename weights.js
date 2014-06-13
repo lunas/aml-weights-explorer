@@ -8,7 +8,7 @@
   };
 
   $(function() {
-    var Calculater, Category, Index, Indicator, by_, calculator, get_comparison_data, initialize, model, orig_aml_data, orig_data, orig_data_by_country, orig_data_by_osc, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle;
+    var Calculater, Category, Index, Indicator, by_, calculator, data_tables, get_comparison_data, initialize, model, orig_aml_data, orig_data, orig_data_by_country, orig_data_by_osc, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle, update_data_tables, update_rank;
     scatter_width = 1000;
     scatter_height = 1000;
     scatter_padding = 40;
@@ -312,8 +312,10 @@
       list.selectAll('tr').remove();
       return list.selectAll('tr').data(data).order().enter().append('tr').html(function(row, i) {
         var s;
-        s = '<td>' + row.country + '</td>';
+        s = '<td class="rank">' + row.rank + '</td>';
+        s += '<td>' + row.country + '</td>';
         s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>';
+        s += '<td class="rank">' + orig_data[i].rank + '</td>';
         s += '<td>' + orig_data[i].country + '</td>';
         return s += '<td>' + d3.round(orig_data[i].OVERALL_SCORE, 2) + '</td>';
       });
@@ -386,24 +388,22 @@
         return 0;
       };
     };
+    update_rank = function(data) {
+      var rank, row, _i, _len;
+      data.sort(by_('OVERALL_SCORE', true));
+      rank = 1;
+      for (_i = 0, _len = data.length; _i < _len; _i++) {
+        row = data[_i];
+        row.rank = rank++;
+      }
+      return data;
+    };
     get_comparison_data = function(data_old, data_new) {
-      var i, rank, row, _i, _j, _k, _len, _len1, _ref, _results;
-      data_old.sort(by_('OVERALL_SCORE', true));
-      rank = 1;
-      for (_i = 0, _len = data_old.length; _i < _len; _i++) {
-        row = data_old[_i];
-        row.rank = rank++;
-      }
-      data_new.sort(by_('OVERALL_SCORE', true));
-      rank = 1;
-      for (_j = 0, _len1 = data_new.length; _j < _len1; _j++) {
-        row = data_new[_j];
-        row.rank = rank++;
-      }
+      var i, _i, _ref, _results;
       data_old.sort(by_('country'));
       data_new.sort(by_('country'));
       _results = [];
-      for (i = _k = 0, _ref = data_old.length - 1; 0 <= _ref ? _k <= _ref : _k >= _ref; i = 0 <= _ref ? ++_k : --_k) {
+      for (i = _i = 0, _ref = data_old.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
         _results.push({
           country: data_old[i].country,
           osc_old: data_old[i].OVERALL_SCORE,
@@ -414,10 +414,21 @@
       }
       return _results;
     };
+    update_data_tables = function() {
+      var table, _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = data_tables.length; _i < _len; _i++) {
+        table = data_tables[_i];
+        _results.push(table.rows().invalidate().draw());
+      }
+      return _results;
+    };
     d3.select('#update_ranking').on('click', function() {
       var data;
       if (calculator.ready()) {
         data = calculator.update_country_osc();
+        data = update_rank(data);
+        update_data_tables();
         render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)), orig_data_by_osc);
         render_ranking('#ranking_country', data.sort(by_('country')), orig_data_by_country);
         return render_scatterplot(data, orig_data);
@@ -432,14 +443,16 @@
     jQuery('#display').tabs();
     orig_aml_data = null;
     orig_data = orig_data_by_osc = orig_data_by_country = null;
+    data_tables = [];
     calculator = new Calculator(Index._indices, Index._categories);
     initialize = function(data) {
       calculator.set_data(data);
       orig_data = calculator.update_country_osc();
+      orig_data = update_rank(orig_data);
       orig_data_by_osc = orig_data.copy_sort(by_('OVERALL_SCORE', true));
       orig_data_by_country = orig_data.sort(by_('country'));
       jQuery('#update_ranking').click();
-      return jQuery('#ranking_osc table, #ranking_country table').DataTable({
+      return data_tables = jQuery('#ranking_osc table, #ranking_country table').dataTable({
         ordering: false,
         paging: false
       });

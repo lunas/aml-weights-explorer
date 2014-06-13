@@ -219,8 +219,10 @@ $ ->
       .enter()
       .append('tr')
       .html (row, i)->
-        s = '<td>' + row.country + '</td>'
+        s = '<td class="rank">' + row.rank + '</td>'
+        s += '<td>' + row.country + '</td>'
         s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>'
+        s += '<td class="rank">' + orig_data[i].rank + '</td>'
         s += '<td>' + orig_data[i].country + '</td>'
         s += '<td>' + d3.round(orig_data[i].OVERALL_SCORE, 2) + '</td>'
 
@@ -306,17 +308,13 @@ $ ->
       return -ret if a[key] < b[key]
       return 0
 
+  update_rank = (data) ->
+    data.sort( by_('OVERALL_SCORE', true) )
+    rank = 1
+    row.rank = rank++ for row in data
+    data
+
   get_comparison_data = (data_old, data_new) ->
-
-    # add rank
-    data_old.sort( by_('OVERALL_SCORE', true) )
-    rank = 1
-    row.rank = rank++ for row in data_old
-
-    data_new.sort( by_('OVERALL_SCORE', true) )
-    rank = 1
-    row.rank = rank++ for row in data_new
-
     # sort both by country so we're sure thing's aren't mixed up
     data_old.sort( by_('country') )
     data_new.sort( by_('country') )
@@ -328,6 +326,9 @@ $ ->
       rank_old: data_old[i].rank
       rank_new: data_new[i].rank
 
+  update_data_tables = ()->
+    for table in data_tables
+      table.rows().invalidate().draw()
 
 ################## "Main"
 
@@ -336,6 +337,8 @@ $ ->
   d3.select('#update_ranking').on 'click', ()->
     if calculator.ready()
       data = calculator.update_country_osc()
+      data = update_rank( data )
+      update_data_tables()
       render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ),
         orig_data_by_osc)
       render_ranking( '#ranking_country', data.sort( by_('country') ),
@@ -353,18 +356,20 @@ $ ->
 
   orig_aml_data = null # global variable that keeps the original AML ranking as of June 2014
   orig_data = orig_data_by_osc = orig_data_by_country = null
+  data_tables = []
 
   calculator = new Calculator(Index._indices, Index._categories)
 
   initialize = (data) ->
     calculator.set_data(data)
     orig_data = calculator.update_country_osc()
+    orig_data = update_rank(orig_data)
     orig_data_by_osc = orig_data.copy_sort( by_('OVERALL_SCORE', true) )
     orig_data_by_country = orig_data.sort( by_('country') )
 
     jQuery('#update_ranking').click()
 
-    jQuery('#ranking_osc table, #ranking_country table').DataTable(
+    data_tables = jQuery('#ranking_osc table, #ranking_country table').dataTable(
       ordering: false
       paging: false
     )
