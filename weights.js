@@ -68,7 +68,7 @@
       };
 
       Index.prototype.near_100 = function(value) {
-        return Math.abs(value - 100) <= 1;
+        return Math.abs(value - 100) < 1;
       };
 
       Index.set_indices = function(indices) {

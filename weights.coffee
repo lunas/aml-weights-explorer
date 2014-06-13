@@ -53,7 +53,7 @@ $ ->
       else
         $( @selector() ).removeClass( 'not-100' )
 
-    near_100: (value) -> Math.abs( value - 100 ) <= 1
+    near_100: (value) -> Math.abs( value - 100 ) < 1
 
     # class methods
 
