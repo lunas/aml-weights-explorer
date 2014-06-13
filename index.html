@@ -34,7 +34,7 @@
     calculate the AML Index. This is because here we directly calcule the osc from the indicators, not via
     the categories. Probably introduced by missing values.
   </p>
-  </ul>
+
 <table id="weights-ui">
   <tr>
     <th>Category</th>
@@ -43,7 +43,9 @@
     <th>Weight within Overall score (%)</th>
   </tr>
   <tr class="fatf">
-    <td rowspan="3">ML/TF</td>
+    <td rowspan="3">ML/TF
+      <span class="cat-weight-sum ML_TF"></span>
+    </td>
     <td>fatf</td>
     <td class="cat-weight"><span class="TKAdjustableNumber" data-var="fatf" data-format="%.2f" data-min="0" data-max="100"></span></td>
     <td class="osc-weight"><span data-var="fatf_osc" data-format="%.2f" data-min="0" data-max="100"></span></td>
@@ -59,13 +61,17 @@
     <td class="osc-weight"><span data-var="us_incsr_osc" data-format="%.2f" data-min="0" data-max="100"></span></td>
   </tr>
   <tr class="ti-cpi">
-    <td>CORRUPTION RISK</td>
+    <td>CORRUPTION RISK
+      <span class="cat-weight-sum CORRUPTION_RISK"></span>
+    </td>
     <td>ti cpi</td>
     <td class="cat-weight"><span class="TKAdjustableNumber" data-var="ti_cpi" data-format="%.2f" data-min="0" data-max="100"></span></td>
     <td class="osc-weight"><span data-var="ti_cpi_osc" data-format="%.2f" data-min="0" data-max="100"></span></td>
   </tr>
   <tr class="business-disclosure">
-    <td rowspan="4">FINANCIAL TRANSPARENCY & STANDARDS</td>
+    <td rowspan="4">FINANCIAL TRANSPARENCY & STANDARDS
+      <span class="cat-weight-sum FIN_TRANSPAR_STD"></span>
+    </td>
     <td>WB Business disclosure</td>
     <td class="cat-weight"><span class="TKAdjustableNumber" data-var="wb_business_disclosure" data-format="%.2f" data-min="0" data-max="100"></span></td>
     <td class="osc-weight"><span data-var="wb_business_disclosure_osc" data-format="%.2f" data-min="0" data-max="100"></span></td>
@@ -86,7 +92,9 @@
     <td class="osc-weight"><span data-var="wb_fin_sector_reg_osc" data-format="%.2f" data-min="0" data-max="100"></span></td>
   </tr>
   <tr class="open-budget">
-    <td rowspan="3">PUBLIC TRANSPARENCY & ACCCOUNTABILITY</td>
+    <td rowspan="3">PUBLIC TRANSPARENCY & ACCCOUNTABILITY
+      <span class="cat-weight-sum PUBLIC_TRANSPAR_ACCOUNT"></span>
+    </td>
     <td>open budget</td>
     <td class="cat-weight"><span class="TKAdjustableNumber" data-var="open_budget" data-format="%.2f" data-min="0" data-max="100"></span></td>
     <td class="osc-weight"><span data-var="open_budget_osc" data-format="%.2f" data-min="0" data-max="100"></span></td>
@@ -102,7 +110,9 @@
     <td class="osc-weight"><span data-var="idea_political_disclosure_osc" data-format="%.2f" data-min="0" data-max="100"></span></td>
   </tr>
   <tr class="wef-gcr-instit-strength">
-    <td rowspan="3">POLITICAL & LEGAL RISK</td>
+    <td rowspan="3">POLITICAL & LEGAL RISK
+      <span class="cat-weight-sum POLITICAL_LEGAL_RISK"></span>
+    </td>
     <td>wef gcr institutional strength</td>
     <td class="cat-weight"><span class="TKAdjustableNumber" data-var="wef_instit_strength" data-format="%.2f" data-min="0" data-max="100"></span></td>
     <td class="osc-weight"><span data-var="wef_instit_strength_osc" data-format="%.2f" data-min="0" data-max="100"></span></td>
@@ -118,7 +128,9 @@
     <td class="osc-weight"><span data-var="freedom_house_osc" data-format="%.2f" data-min="0" data-max="100"></span></td>
   </tr>
   <tr class="ml-tf category">
-    <td rowspan="5">CATEGORIES</td>
+    <td rowspan="5">Categories
+      <span class="cat-weight-sum osc"></span>
+    </td>
     <td>ML/TF</td>
     <td class="cat-weight"></td>
     <td class="osc-weight"><span class="TKAdjustableNumber" data-var="ML_TF" data-format="%.2f" data-min="0" data-max="100"></span></td>
@@ -161,7 +173,7 @@
   <div id="ranking_osc">
     <table>
       <thead>
-      <tr><th>New ranking</th><th></th><th>Old ranking</th><th></th></tr>
+      <tr><th>New ranking</th><th></th><th>Original ranking</th><th></th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -169,7 +181,7 @@
   <div id="ranking_country">
     <table>
       <thead>
-        <tr><th>New overall scores</th><th></th><th>Old overeall scores</th><th></th></tr>
+        <tr><th>New overall scores</th><th></th><th>Original overall scores</th><th></th></tr>
       </thead>
       <tbody></tbody>
     </table>

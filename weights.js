@@ -109,14 +109,20 @@
       };
 
       Indicator.prototype.mark_cat = function(switch_on) {
-        var index, _i, _len, _ref, _results;
+        var index, _i, _len, _ref;
         _ref = this.cat.get_my_indices();
-        _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           index = _ref[_i];
-          _results.push(index.mark(switch_on));
+          index.mark(switch_on);
         }
-        return _results;
+        return this.update_cat_weight_sum();
+      };
+
+      Indicator.prototype.update_cat_weight_sum = function() {
+        var s, selector;
+        selector = '.cat-weight-sum.' + this.cat.variable;
+        s = 'weight sum: ' + d3.round(this.cat.weight_sum());
+        return jQuery(selector).text(s);
       };
 
       return Indicator;
@@ -145,12 +151,14 @@
         }, 0);
       };
 
-      Category.prototype.weight_sum_is_100 = function() {
-        var sum;
-        sum = Index._categories.reduce(function(sum, element) {
+      Category.prototype.all_cat_weight_sum = function() {
+        return Index._categories.reduce(function(sum, element) {
           return sum + element.get_weight();
         }, 0);
-        return this.near_100(sum);
+      };
+
+      Category.prototype.weight_sum_is_100 = function() {
+        return this.near_100(this.all_cat_weight_sum());
       };
 
       Category.prototype.my_indices_weights_are_100 = function() {
@@ -158,14 +166,20 @@
       };
 
       Category.prototype.mark_cat = function(switch_on) {
-        var cat, _i, _len, _ref, _results;
+        var cat, _i, _len, _ref;
         _ref = Index._categories;
-        _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           cat = _ref[_i];
-          _results.push(cat.mark(switch_on));
+          cat.mark(switch_on);
         }
-        return _results;
+        return this.update_all_cat_weight_sum();
+      };
+
+      Category.prototype.update_all_cat_weight_sum = function() {
+        var s, selector;
+        selector = '.cat-weight-sum.osc';
+        s = 'weight sum: ' + d3.round(this.all_cat_weight_sum());
+        return jQuery(selector).text(s);
       };
 
       return Category;
@@ -342,7 +356,7 @@
         'text-anchor': 'end',
         x: scatter_width - 3 * scatter_padding,
         y: scatter_height - 2
-      }).text('Overall score based on old AML weighting');
+      }).text('Overall score based on original AML weighting');
       return svg.append('text').attr({
         "class": 'y label',
         'text-anchor': 'end',

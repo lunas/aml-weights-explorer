@@ -76,8 +76,14 @@ $ ->
     weight_sum_is_100: ()->
       @near_100( @cat.weight_sum() )
 
-    mark_cat: (switch_on) -> index.mark(switch_on) for index in @cat.get_my_indices()
+    mark_cat: (switch_on) ->
+      index.mark(switch_on) for index in @cat.get_my_indices()
+      @update_cat_weight_sum()
 
+    update_cat_weight_sum: () ->
+      selector = '.cat-weight-sum.' + @cat.variable
+      s = 'weight sum: ' + d3.round @cat.weight_sum()
+      jQuery(selector).text s
 
 
   window.Category = class Category extends Index
@@ -93,20 +99,28 @@ $ ->
         sum + element.get_weight()
       0)
 
-    # Checks the sum of the weight of all categories.
-    weight_sum_is_100: ()->
-      sum = Index._categories.reduce( (sum, element) ->
+    all_cat_weight_sum: () ->
+      Index._categories.reduce( (sum, element) ->
         sum + element.get_weight()
       0)
-      @near_100(sum)
+
+
+    # Checks the sum of the weight of ALL categories.
+    weight_sum_is_100: ()-> @near_100( @all_cat_weight_sum() )
 
     # Checks whether the sum of the indices belonging to this category
     # sum up to 100
     my_indices_weights_are_100: () ->
       @near_100( @weight_sum() )
 
-    mark_cat: (switch_on)-> cat.mark(switch_on) for cat in Index._categories
+    mark_cat: (switch_on)->
+      cat.mark(switch_on) for cat in Index._categories
+      @update_all_cat_weight_sum()
 
+    update_all_cat_weight_sum: () ->
+      selector = '.cat-weight-sum.osc'
+      s = 'weight sum: ' + d3.round(@all_cat_weight_sum())
+      jQuery(selector).text s
 
 
   model = {
@@ -283,7 +297,7 @@ $ ->
       'text-anchor': 'end'
       x: scatter_width - 3*scatter_padding
       y: scatter_height - 2
-    .text 'Overall score based on old AML weighting'
+    .text 'Overall score based on original AML weighting'
 
     svg.append 'text'
     .attr

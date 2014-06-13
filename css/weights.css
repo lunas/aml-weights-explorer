@@ -2,12 +2,21 @@ table#weights-ui {
     border: 1px solid grey;
 }
 table#weights-ui td {
+    position: relative;
     border: 1px solid grey;
     padding: 2px;
 }
 
 .not-100 {
     background-color: orange;
+}
+
+table#weights-ui .cat-weight-sum {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin: 5px;
+    font-style: italic;
 }
 
 .btn-group {
@@ -20,6 +29,7 @@ table#weights-ui td {
 #display table th {
     padding-bottom: 10px;
 }
+
 /* ----------- scatter plot --------- */
 
 .axis path,
