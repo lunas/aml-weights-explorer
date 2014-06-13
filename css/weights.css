@@ -43,3 +43,9 @@ table#weights-ui .cat-weight-sum {
     font-family: sans-serif;
     font-size: 11px;
 }
+
+text:hover {
+    fill: orange;
+    font-weight: bold;
+    font-size: 20px;
+}
