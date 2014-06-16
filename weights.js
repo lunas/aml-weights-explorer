@@ -8,7 +8,7 @@
   };
 
   $(function() {
-    var Calculater, Category, Index, Indicator, by_, calculator, get_comparison_data, initialize, model, orig_aml_data, orig_data, orig_data_by_country, orig_data_by_osc, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle, update_rank;
+    var Calculater, Category, Index, Indicator, by_, calculator, filter, get_comparison_data, initialize, model, orig_aml_data, orig_data, orig_data_by_country, orig_data_by_osc, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle, update_rank;
     scatter_width = 1000;
     scatter_height = 1000;
     scatter_padding = 40;
@@ -313,7 +313,7 @@
       return list.selectAll('tr').data(data).order().enter().append('tr').html(function(row, i) {
         var s;
         s = '<td class="rank">' + row.rank + '</td>';
-        s += '<td>' + row.country + '</td>';
+        s += '<td class="country">' + row.country + '</td>';
         s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>';
         s += '<td class="rank">' + orig_data[i].rank + '</td>';
         s += '<td>' + orig_data[i].country + '</td>';
@@ -414,6 +414,35 @@
       }
       return _results;
     };
+    filter = function(selector, element) {
+      var $rows, $valid, regexp, row_selector;
+      row_selector = selector + ' table tr';
+      $rows = jQuery(row_selector).hide();
+      regexp = new RegExp(jQuery(element).val(), 'i');
+      $valid = $rows.filter(function() {
+        return regexp.test(jQuery(this).find('td.country').text());
+      }).show();
+      return $rows.not($valid).hide();
+    };
+    jQuery('#ranking_osc input.search').on('keyup change', function(e) {
+      if (e.keyCode === 27) {
+        jQuery(this).val('');
+      }
+      return filter('#ranking_osc', this);
+    });
+    jQuery('#ranking_country input.search').on('keyup change', function(e) {
+      if (e.keyCode === 27) {
+        jQuery(this).val('');
+      }
+      return filter('#ranking_country', this);
+    });
+    jQuery('.reset-search').on('click', function(event) {
+      jQuery('.search').val('');
+      filter('#ranking_osc', this);
+      filter('#ranking_country', this);
+      event.preventDefault();
+      return false;
+    });
     d3.select('#update_ranking').on('click', function() {
       var data;
       if (calculator.ready()) {

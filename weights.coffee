@@ -220,7 +220,7 @@ $ ->
       .append('tr')
       .html (row, i)->
         s = '<td class="rank">' + row.rank + '</td>'
-        s += '<td>' + row.country + '</td>'
+        s += '<td class="country">' + row.country + '</td>'
         s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>'
         s += '<td class="rank">' + orig_data[i].rank + '</td>'
         s += '<td>' + orig_data[i].country + '</td>'
@@ -325,6 +325,33 @@ $ ->
       osc_new: data_new[i].OVERALL_SCORE
       rank_old: data_old[i].rank
       rank_new: data_new[i].rank
+
+  ################## Table country filter
+
+  filter = (selector, element)->
+    row_selector = selector + ' table tr'
+    $rows = jQuery(row_selector).hide()
+    regexp = new RegExp( jQuery(element).val(), 'i')
+    $valid = $rows.filter( ()->
+      regexp.test( jQuery( this ).find( 'td.country' ).text() )
+    ).show()
+    $rows.not( $valid ).hide()
+
+  jQuery( '#ranking_osc input.search').on 'keyup change', (e)->
+    jQuery( this).val('') if e.keyCode == 27 # ESC
+    filter( '#ranking_osc', this )
+
+  jQuery( '#ranking_country input.search').on 'keyup change', (e)->
+    jQuery( this).val('') if e.keyCode == 27 # ESC
+    filter( '#ranking_country', this )
+
+  jQuery( '.reset-search').on 'click', (event)->
+    jQuery('.search').val('')
+    filter( '#ranking_osc', this )
+    filter( '#ranking_country', this )
+    event.preventDefault()
+    false
+
 
   ################## "Main"
 

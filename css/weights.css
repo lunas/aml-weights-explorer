@@ -35,6 +35,14 @@ table#weights-ui .cat-weight-sum {
     padding-bottom: 10px;
 }
 
+#display .input-group .input-group-btn button.btn {
+    /* overwrite bad influence of jQuery-ui on twitter bootstrap */
+    font-size: 14px;
+}
+
+.search-row {
+    margin-bottom: 10px;
+}
 /* ----------- scatter plot --------- */
 
 .axis path,

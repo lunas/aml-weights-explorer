@@ -17,7 +17,6 @@
 
   <link type="text/css" href="bower_components/jquery-ui/themes/smoothness/jquery-ui.css" rel="stylesheet">
   <link type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
-  <link type="text/css" href="bower_components/datatables/media/css/jquery.dataTables.css" rel="stylesheet">
   <link type="text/css" href="css/TangleKit.css" rel="stylesheet">
   <link type="text/css" href="css/weights.css" rel="stylesheet">
 
@@ -169,7 +168,22 @@
     <li><a href="#comparison">Graphic comparison</a></li>
   </ul>
   <div id="ranking_osc">
-    <table>
+
+    <form class="form-horizontal">
+      <div class="form-group">
+        <label for="search-osc" class="col-sm-2 control-label">Filter country</label>
+        <div class="col-sm-6">
+          <div class="input-group">
+            <input type="text" class="form-control search" id="search-osc">
+          <span class="input-group-btn">
+            <button class="btn btn-default reset-search">x</button>
+          </span>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <table class="table table-hover table-condensed">
       <thead>
       <tr>
         <th class="rank"></th>
@@ -184,7 +198,23 @@
     </table>
   </div>
   <div id="ranking_country">
-    <table>
+
+    <form class="form-horizontal">
+      <div class="form-group">
+        <label for="search-country" class="col-sm-2 control-label">Filter country</label>
+        <div class="col-sm-6">
+          <div class="input-group">
+            <input type="text" class="form-control search" id="search-country">
+          <span class="input-group-btn">
+            <button class="btn btn-default reset-search">x</button>
+          </span>
+          </div>
+        </div>
+      </div>
+    </form>
+
+
+    <table class="table table-hover table-condensed">
       <thead>
         <tr>
           <th class="rank"></th>
