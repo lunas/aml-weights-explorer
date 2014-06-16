@@ -327,10 +327,17 @@ $ ->
       rank_new: data_new[i].rank
 
   update_data_tables = ()->
-    for table in data_tables
-      table.rows().invalidate().draw()
+    for selector in ['#ranking_osc table', '#ranking_country table']
+      table = $(selector).DataTable()
+      table.rows().invalidate()
 
-################## "Main"
+  add_data_tables = ()->
+    jQuery('#ranking_osc table, #ranking_country table').dataTable(
+      ordering: false
+      paging: false
+    )
+
+  ################## "Main"
 
   # Buttons to update and reset
 
@@ -344,6 +351,8 @@ $ ->
       render_ranking( '#ranking_country', data.sort( by_('country') ),
         orig_data_by_country)
       render_scatterplot(data, orig_data)
+
+      # add_data_tables()
     else
       alert('Please make sure the weights add up to 100.')
 
@@ -356,7 +365,6 @@ $ ->
 
   orig_aml_data = null # global variable that keeps the original AML ranking as of June 2014
   orig_data = orig_data_by_osc = orig_data_by_country = null
-  data_tables = []
 
   calculator = new Calculator(Index._indices, Index._categories)
 
@@ -367,12 +375,8 @@ $ ->
     orig_data_by_osc = orig_data.copy_sort( by_('OVERALL_SCORE', true) )
     orig_data_by_country = orig_data.sort( by_('country') )
 
+    add_data_tables()
     jQuery('#update_ranking').click()
-
-    data_tables = jQuery('#ranking_osc table, #ranking_country table').dataTable(
-      ordering: false
-      paging: false
-    )
 
   # load the data and initialize
   d3.csv "data/aml-public.csv", (error, data) ->

@@ -8,7 +8,7 @@
   };
 
   $(function() {
-    var Calculater, Category, Index, Indicator, by_, calculator, data_tables, get_comparison_data, initialize, model, orig_aml_data, orig_data, orig_data_by_country, orig_data_by_osc, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle, update_data_tables, update_rank;
+    var Calculater, Category, Index, Indicator, add_data_tables, by_, calculator, get_comparison_data, initialize, model, orig_aml_data, orig_data, orig_data_by_country, orig_data_by_osc, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle, update_data_tables, update_rank;
     scatter_width = 1000;
     scatter_height = 1000;
     scatter_padding = 40;
@@ -415,13 +415,21 @@
       return _results;
     };
     update_data_tables = function() {
-      var table, _i, _len, _results;
+      var selector, table, _i, _len, _ref, _results;
+      _ref = ['#ranking_osc table', '#ranking_country table'];
       _results = [];
-      for (_i = 0, _len = data_tables.length; _i < _len; _i++) {
-        table = data_tables[_i];
-        _results.push(table.rows().invalidate().draw());
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        selector = _ref[_i];
+        table = $(selector).DataTable();
+        _results.push(table.rows().invalidate());
       }
       return _results;
+    };
+    add_data_tables = function() {
+      return jQuery('#ranking_osc table, #ranking_country table').dataTable({
+        ordering: false,
+        paging: false
+      });
     };
     d3.select('#update_ranking').on('click', function() {
       var data;
@@ -443,7 +451,6 @@
     jQuery('#display').tabs();
     orig_aml_data = null;
     orig_data = orig_data_by_osc = orig_data_by_country = null;
-    data_tables = [];
     calculator = new Calculator(Index._indices, Index._categories);
     initialize = function(data) {
       calculator.set_data(data);
@@ -451,11 +458,8 @@
       orig_data = update_rank(orig_data);
       orig_data_by_osc = orig_data.copy_sort(by_('OVERALL_SCORE', true));
       orig_data_by_country = orig_data.sort(by_('country'));
-      jQuery('#update_ranking').click();
-      return data_tables = jQuery('#ranking_osc table, #ranking_country table').dataTable({
-        ordering: false,
-        paging: false
-      });
+      add_data_tables();
+      return jQuery('#update_ranking').click();
     };
     return d3.csv("data/aml-public.csv", function(error, data) {
       if (error) {
