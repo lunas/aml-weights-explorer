@@ -326,17 +326,6 @@ $ ->
       rank_old: data_old[i].rank
       rank_new: data_new[i].rank
 
-  update_data_tables = ()->
-    for selector in ['#ranking_osc table', '#ranking_country table']
-      table = $(selector).DataTable()
-      table.rows().invalidate()
-
-  add_data_tables = ()->
-    jQuery('#ranking_osc table, #ranking_country table').dataTable(
-      ordering: false
-      paging: false
-    )
-
   ################## "Main"
 
   # Buttons to update and reset
@@ -345,14 +334,11 @@ $ ->
     if calculator.ready()
       data = calculator.update_country_osc()
       data = update_rank( data )
-      update_data_tables()
       render_ranking( '#ranking_osc', data.sort( by_('OVERALL_SCORE', true) ),
         orig_data_by_osc)
       render_ranking( '#ranking_country', data.sort( by_('country') ),
         orig_data_by_country)
       render_scatterplot(data, orig_data)
-
-      # add_data_tables()
     else
       alert('Please make sure the weights add up to 100.')
 
@@ -375,7 +361,6 @@ $ ->
     orig_data_by_osc = orig_data.copy_sort( by_('OVERALL_SCORE', true) )
     orig_data_by_country = orig_data.sort( by_('country') )
 
-    add_data_tables()
     jQuery('#update_ranking').click()
 
   # load the data and initialize

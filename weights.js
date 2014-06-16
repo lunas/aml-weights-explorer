@@ -8,7 +8,7 @@
   };
 
   $(function() {
-    var Calculater, Category, Index, Indicator, add_data_tables, by_, calculator, get_comparison_data, initialize, model, orig_aml_data, orig_data, orig_data_by_country, orig_data_by_osc, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle, update_data_tables, update_rank;
+    var Calculater, Category, Index, Indicator, by_, calculator, get_comparison_data, initialize, model, orig_aml_data, orig_data, orig_data_by_country, orig_data_by_osc, render_ranking, render_scatterplot, scatter_height, scatter_padding, scatter_width, tangle, update_rank;
     scatter_width = 1000;
     scatter_height = 1000;
     scatter_padding = 40;
@@ -414,29 +414,11 @@
       }
       return _results;
     };
-    update_data_tables = function() {
-      var selector, table, _i, _len, _ref, _results;
-      _ref = ['#ranking_osc table', '#ranking_country table'];
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        selector = _ref[_i];
-        table = $(selector).DataTable();
-        _results.push(table.rows().invalidate());
-      }
-      return _results;
-    };
-    add_data_tables = function() {
-      return jQuery('#ranking_osc table, #ranking_country table').dataTable({
-        ordering: false,
-        paging: false
-      });
-    };
     d3.select('#update_ranking').on('click', function() {
       var data;
       if (calculator.ready()) {
         data = calculator.update_country_osc();
         data = update_rank(data);
-        update_data_tables();
         render_ranking('#ranking_osc', data.sort(by_('OVERALL_SCORE', true)), orig_data_by_osc);
         render_ranking('#ranking_country', data.sort(by_('country')), orig_data_by_country);
         return render_scatterplot(data, orig_data);
@@ -458,7 +440,6 @@
       orig_data = update_rank(orig_data);
       orig_data_by_osc = orig_data.copy_sort(by_('OVERALL_SCORE', true));
       orig_data_by_country = orig_data.sort(by_('country'));
-      add_data_tables();
       return jQuery('#update_ranking').click();
     };
     return d3.csv("data/aml-public.csv", function(error, data) {

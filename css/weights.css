@@ -28,6 +28,7 @@ table#weights-ui .cat-weight-sum {
 }
 #display table td.rank {
     border-left: 1px solid black;
+    padding-left: 5px;
 }
 #display table th {
     padding-left: 0;
