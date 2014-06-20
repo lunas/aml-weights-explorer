@@ -207,14 +207,19 @@ $ ->
 
     calculate_osc: (row)->
       sum = @categories.reduce( (sum, cat) ->
+        cat_mean = cat.mean row
+        return sum if isNaN cat_mean
         weight = cat.get_weight()
-        sum.total += weight * cat.mean row
+        sum.total += weight * cat_mean
         sum.weight_total += weight
         sum
       {total: 0, weight_total: 0} )
       sum.total / sum.weight_total
 
-    calculate_osc_old: ( row ) ->
+    # Calculates osc directly based on indices and their osc_weight.
+    # Makes more sense but they want it like in the Excel, so based
+    # on categories. So this method is deprecated.
+    calculate_osc_directly: ( row ) ->
       sum = @indices.reduce( (sum, index) ->
         value = row[ index.variable ]
         return sum if isNaN(value)

@@ -276,9 +276,13 @@
       Calculater.prototype.calculate_osc = function(row) {
         var sum;
         sum = this.categories.reduce(function(sum, cat) {
-          var weight;
+          var cat_mean, weight;
+          cat_mean = cat.mean(row);
+          if (isNaN(cat_mean)) {
+            return sum;
+          }
           weight = cat.get_weight();
-          sum.total += weight * cat.mean(row);
+          sum.total += weight * cat_mean;
           sum.weight_total += weight;
           return sum;
         }, {
@@ -288,7 +292,7 @@
         return sum.total / sum.weight_total;
       };
 
-      Calculater.prototype.calculate_osc_old = function(row) {
+      Calculater.prototype.calculate_osc_directly = function(row) {
         var sum;
         sum = this.indices.reduce(function(sum, index) {
           var value;
