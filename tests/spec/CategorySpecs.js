@@ -11,7 +11,7 @@
       ind2 = new Indicator('ind2', 25, category);
       ind3 = new Indicator('ind3', 25, category);
       ind5 = new Indicator('ind11', 33, category2);
-      ind6 = new Indicator('ind12', 33, category2);
+      ind6 = new Indicator('ind12', 0, category2);
       tangle = {
         setValue: function(variable, value) {},
         getValue: function(variable) {
@@ -31,8 +31,13 @@
       });
     });
     describe('weight_sum', function() {
-      return it('sums the weights of the indicators belonging to this category', function() {
+      it('sums the weights of the indicators belonging to this category', function() {
         return expect(category.weight_sum()).toEqual(100);
+      });
+      return describe('when one indicator has weight 0', function() {
+        return it('still correctly sums the weights of the indicators belonging to this category', function() {
+          return expect(category2.weight_sum()).toEqual(67);
+        });
       });
     });
     describe('weight_sum_is_100', function() {

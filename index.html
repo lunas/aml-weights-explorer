@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>D3 Test</title>
+  <title>AML Index weight explorer</title>
 
   <script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
   <script type="text/javascript" src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
@@ -229,8 +229,14 @@
     </table>
   </div>
   <div id="comparison">
-    <div id="scatter">
-    </div>
+    <p>The x-axis represents the overall score based on the currently used weighting. The y-axis represents the
+    overall score based on the weighting specified above.</p>
+    <p>Next to each country, the rank based on the currently used weighing is shown first, followed by the rank
+    based on the weighting specified above.</p>
+    <p>If a country gets a lower rank (closer to 1, i.e. "worse" in terms of risk) with the new weighting than
+      with the old weighting, then it will be above the diagonal, since a lower rank means a higher overall score.</p>
+    <p>If on the other hand a country gets a higher rank in the new weighting, it will be below the diagonal.</p>
+    <div id="scatter"></div>
   </div>
 </div>
 
