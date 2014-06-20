@@ -92,3 +92,20 @@ describe 'Category', ()->
 
       for cat in Index._categories
         expect( cat.mark ).toHaveBeenCalled()
+
+  describe 'mean', () ->
+
+    beforeEach () ->
+      for index in Index._indices
+        spyOn( index, 'get_weight').and.returnValue 33.33
+
+    it "returns the mean of row weighted by sub-indices' weights", () ->
+      row = {ind1: 3, ind2: 7, ind3: 8, ind4: 9, ind5: 1}
+      exp = (3 * 33.3 + 7 * 33.3 + 8 * 33.3) / (99.99)
+      expect( category.mean( row ) ).toBeCloseTo( exp, 1 )
+
+    it "returns the weighted mean of the row taking care of missings", () ->
+      row = {ind1: 3, ind2: "NA", ind3: 8, ind4: 9, ind5: 1}
+      exp = (3 * 33.3 + 8 * 33.3) / (66.66)
+      expect( category.mean( row ) ).toBeCloseTo( exp, 1 )
+

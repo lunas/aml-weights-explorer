@@ -155,6 +155,24 @@
         }, 0);
       };
 
+      Category.prototype.mean = function(row) {
+        var sum;
+        sum = this.get_my_indices().reduce(function(sum, index) {
+          var value;
+          value = row[index.variable];
+          if (isNaN(value)) {
+            return sum;
+          }
+          sum.total += index.get_weight() * value;
+          sum.weight_total += index.get_weight();
+          return sum;
+        }, {
+          total: 0,
+          weight_total: 0
+        });
+        return sum.total / sum.weight_total;
+      };
+
       Category.prototype.all_cat_weight_sum = function() {
         return Index._categories.reduce(function(sum, element) {
           return sum + element.get_weight();
@@ -256,6 +274,21 @@
       };
 
       Calculater.prototype.calculate_osc = function(row) {
+        var sum;
+        sum = this.categories.reduce(function(sum, cat) {
+          var weight;
+          weight = cat.get_weight();
+          sum.total += weight * cat.mean(row);
+          sum.weight_total += weight;
+          return sum;
+        }, {
+          total: 0,
+          weight_total: 0
+        });
+        return sum.total / sum.weight_total;
+      };
+
+      Calculater.prototype.calculate_osc_old = function(row) {
         var sum;
         sum = this.indices.reduce(function(sum, index) {
           var value;

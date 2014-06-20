@@ -53,6 +53,7 @@ $ ->
       else
         $( @selector() ).removeClass( 'not-100' )
 
+    # TODO should be a class method
     near_100: (value) -> Math.abs( value - 100 ) < 1
 
     # class methods
@@ -102,12 +103,24 @@ $ ->
         sum + element.get_weight()
       0)
 
+    mean: (row)->
+      sum = @get_my_indices().reduce( (sum, index) ->
+        value = row[ index.variable ]
+        return sum if isNaN(value)
+        sum.total += index.get_weight() * value
+        sum.weight_total += index.get_weight()
+        sum
+      {total: 0, weight_total: 0})
+      sum.total / sum.weight_total
+
+
+    # TODO should be a class method
     all_cat_weight_sum: () ->
       Index._categories.reduce( (sum, element) ->
         sum + element.get_weight()
       0)
 
-
+    # TODO should be a class method
     # Checks the sum of the weight of ALL categories.
     weight_sum_is_100: ()-> @near_100( @all_cat_weight_sum() )
 
@@ -116,14 +129,17 @@ $ ->
     my_indices_weights_are_100: () ->
       @near_100( @weight_sum() )
 
+    # TODO should be a class method?
     mark_cat: (switch_on)->
       cat.mark(switch_on) for cat in Index._categories
       @update_all_cat_weight_sum()
 
+    # TODO should be a class method?
     update_all_cat_weight_sum: () ->
       selector = '.cat-weight-sum.osc'
       s = 'weight sum: ' + d3.round(@all_cat_weight_sum())
       jQuery(selector).text s
+
 
 
   model = {
@@ -189,7 +205,16 @@ $ ->
       for row in @data
         {country: row.country, OVERALL_SCORE: @calculate_osc( row ) }
 
-    calculate_osc: ( row ) ->
+    calculate_osc: (row)->
+      sum = @categories.reduce( (sum, cat) ->
+        weight = cat.get_weight()
+        sum.total += weight * cat.mean row
+        sum.weight_total += weight
+        sum
+      {total: 0, weight_total: 0} )
+      sum.total / sum.weight_total
+
+    calculate_osc_old: ( row ) ->
       sum = @indices.reduce( (sum, index) ->
         value = row[ index.variable ]
         return sum if isNaN(value)

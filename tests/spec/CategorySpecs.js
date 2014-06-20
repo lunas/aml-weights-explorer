@@ -69,7 +69,7 @@
         return expect(category.initial_weight).toEqual(80);
       });
     });
-    return describe('mark_cat', function() {
+    describe('mark_cat', function() {
       return it('marks each index of the same category, and no others', function() {
         var cat, index, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3, _results;
         _ref = Index._indices;
@@ -95,6 +95,42 @@
           _results.push(expect(cat.mark).toHaveBeenCalled());
         }
         return _results;
+      });
+    });
+    return describe('mean', function() {
+      beforeEach(function() {
+        var index, _i, _len, _ref, _results;
+        _ref = Index._indices;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          index = _ref[_i];
+          _results.push(spyOn(index, 'get_weight').and.returnValue(33.33));
+        }
+        return _results;
+      });
+      it("returns the mean of row weighted by sub-indices' weights", function() {
+        var exp, row;
+        row = {
+          ind1: 3,
+          ind2: 7,
+          ind3: 8,
+          ind4: 9,
+          ind5: 1
+        };
+        exp = (3 * 33.3 + 7 * 33.3 + 8 * 33.3) / 99.99;
+        return expect(category.mean(row)).toBeCloseTo(exp, 1);
+      });
+      return it("returns the weighted mean of the row taking care of missings", function() {
+        var exp, row;
+        row = {
+          ind1: 3,
+          ind2: "NA",
+          ind3: 8,
+          ind4: 9,
+          ind5: 1
+        };
+        exp = (3 * 33.3 + 8 * 33.3) / 66.66;
+        return expect(category.mean(row)).toBeCloseTo(exp, 1);
       });
     });
   });
