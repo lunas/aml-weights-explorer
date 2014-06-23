@@ -15,7 +15,7 @@
       tangle = {
         setValue: function(variable, value) {},
         getValue: function(variable) {
-          return false;
+          return null;
         }
       };
       Index.set_tangle(tangle);
@@ -34,9 +34,17 @@
       it('sums the weights of the indicators belonging to this category', function() {
         return expect(category.weight_sum()).toEqual(100);
       });
-      return describe('when one indicator has weight 0', function() {
+      describe('when one indicator has weight 0 and the weight sum is not 100', function() {
         return it('still correctly sums the weights of the indicators belonging to this category', function() {
           return expect(category2.weight_sum()).toEqual(67);
+        });
+      });
+      return describe('when one indicator has weight 0 and the weight sum is 100', function() {
+        beforeEach(function() {
+          return ind5.initial_weight = 66;
+        });
+        return it('still correctly sums the weights of the indicators belonging to this category', function() {
+          return expect(category2.weight_sum()).toEqual(100);
         });
       });
     });

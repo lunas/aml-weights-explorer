@@ -33,7 +33,10 @@ $ ->
     set_weight: (value) ->
       Index._tangle.setValue( @variable, value )
 
-    get_weight:     () -> Index._tangle.getValue( @variable ) or @initial_weight
+    get_weight: () ->
+      weight = Index._tangle.getValue( @variable )
+      weight ?= @initial_weight
+
     get_osc_weight: () -> Index._tangle.getValue( @variable + '_osc' )
 
     reset: () ->

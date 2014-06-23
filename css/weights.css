@@ -10,6 +10,9 @@ table#weights-ui td {
 .not-100 {
     background-color: orange;
 }
+.not-100 input {
+    background-color: orange;
+}
 
 table#weights-ui .cat-weight-sum {
     position: absolute;

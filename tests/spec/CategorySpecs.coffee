@@ -13,7 +13,7 @@ describe 'Category', ()->
     ind6 = new Indicator( 'ind12', 0, category2 )
     tangle = {
       setValue: (variable, value)->
-      getValue: (variable) -> false # so get_weight will return initial_weight
+      getValue: (variable) -> null  # so get_weight will return initial_weight
     }
     Index.set_tangle( tangle )
     Index.set_indices( [ind1, ind2, ind3, ind4, ind5, ind6] )
@@ -32,10 +32,18 @@ describe 'Category', ()->
     it 'sums the weights of the indicators belonging to this category', ()->
       expect( category.weight_sum() ).toEqual( 100 )
 
-    describe 'when one indicator has weight 0', ()->
+    describe 'when one indicator has weight 0 and the weight sum is not 100', ()->
 
       it 'still correctly sums the weights of the indicators belonging to this category', ()->
         expect( category2.weight_sum()).toEqual 67
+
+    describe 'when one indicator has weight 0 and the weight sum is 100', ()->
+
+      beforeEach () ->
+        ind5.initial_weight = 66
+
+      it 'still correctly sums the weights of the indicators belonging to this category', ()->
+        expect( category2.weight_sum()).toEqual 100
 
   describe 'weight_sum_is_100', ()->
 

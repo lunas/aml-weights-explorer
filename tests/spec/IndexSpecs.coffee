@@ -7,8 +7,7 @@ describe 'Index', () ->
     index  = new Indicator( 'fatf', 50, categ )
     tangle = {
       setValue: (variable, value)->
-      getValue: (variable) ->
-        55
+      getValue: (variable) -> 33
     }
     Index.set_tangle( tangle )
 
@@ -37,7 +36,23 @@ describe 'Index', () ->
       expect( tangle.getValue ).toHaveBeenCalledWith( index.variable )
 
     it 'returns the correct value', () ->
-      expect( index.get_weight() ).toEqual( 55 )
+      expect( index.get_weight() ).toEqual( 33 )
+
+    it 'returns the correct value even if it is 0 ', () ->
+      spyOn( tangle, 'getValue').and.returnValue 0
+      expect( index.get_weight() ).toEqual( 0 )
+
+    describe 'when the Tangle variable corresponding to the index is Null', () ->
+
+      it 'returns the initial_weight of the index', () ->
+        spyOn( tangle, 'getValue').and.returnValue null
+        expect( index.get_weight()).toEqual( 50 )
+
+    describe 'when the Tangle variable corresponding to the index is undefined', () ->
+
+      it 'returns the initial_weight of the index', () ->
+        spyOn( tangle, 'getValue').and.returnValue undefined
+        expect( index.get_weight()).toEqual( 50 )
 
   describe 'reset', () ->
 

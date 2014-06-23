@@ -11,7 +11,7 @@ describe "Indicator", () ->
 
     tangle = {
       setValue: (variable, value) ->
-      getValue: (variable) -> false
+      getValue: (variable) -> undefined
     }
     Index.set_tangle( tangle )
     Index.set_indices( [index, index2, index3] )

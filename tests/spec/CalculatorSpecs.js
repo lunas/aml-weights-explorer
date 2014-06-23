@@ -37,7 +37,7 @@
         return expect(calc.data).toEqual([]);
       });
     });
-    describe('calculate_osc_old', function() {
+    describe('calculate_osc_directly', function() {
       it('calculates weighted average of a row based on the osc-weights specified for the indices', function() {
         var expected, row;
         row = {
@@ -49,7 +49,7 @@
           ind6: 6
         };
         expected = 0.5 * (1 + 2 + 3 + 4 + 5 + 6) / (6 * 0.5);
-        return expect(calc.calculate_osc_old(row)).toEqual(expected);
+        return expect(calc.calculate_osc_directly(row)).toEqual(expected);
       });
       return it('calculates weighted average taking care of missings', function() {
         var expected, row;
@@ -62,7 +62,7 @@
           ind6: 6
         };
         expected = 0.5 * (1 + 3 + 5 + 6) / (4 * 0.5);
-        return expect(calc.calculate_osc_old(row)).toEqual(expected);
+        return expect(calc.calculate_osc_directly(row)).toEqual(expected);
       });
     });
     describe('update_country_osc', function() {

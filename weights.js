@@ -34,7 +34,9 @@
       };
 
       Index.prototype.get_weight = function() {
-        return Index._tangle.getValue(this.variable) || this.initial_weight;
+        var weight;
+        weight = Index._tangle.getValue(this.variable);
+        return weight != null ? weight : weight = this.initial_weight;
       };
 
       Index.prototype.get_osc_weight = function() {

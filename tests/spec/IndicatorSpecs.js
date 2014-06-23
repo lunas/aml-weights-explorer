@@ -12,7 +12,7 @@
       tangle = {
         setValue: function(variable, value) {},
         getValue: function(variable) {
-          return false;
+          return void 0;
         }
       };
       Index.set_tangle(tangle);

@@ -9,7 +9,7 @@
       tangle = {
         setValue: function(variable, value) {},
         getValue: function(variable) {
-          return 55;
+          return 33;
         }
       };
       return Index.set_tangle(tangle);
@@ -43,8 +43,24 @@
         index.get_weight();
         return expect(tangle.getValue).toHaveBeenCalledWith(index.variable);
       });
-      return it('returns the correct value', function() {
-        return expect(index.get_weight()).toEqual(55);
+      it('returns the correct value', function() {
+        return expect(index.get_weight()).toEqual(33);
+      });
+      it('returns the correct value even if it is 0 ', function() {
+        spyOn(tangle, 'getValue').and.returnValue(0);
+        return expect(index.get_weight()).toEqual(0);
+      });
+      describe('when the Tangle variable corresponding to the index is Null', function() {
+        return it('returns the initial_weight of the index', function() {
+          spyOn(tangle, 'getValue').and.returnValue(null);
+          return expect(index.get_weight()).toEqual(50);
+        });
+      });
+      return describe('when the Tangle variable corresponding to the index is undefined', function() {
+        return it('returns the initial_weight of the index', function() {
+          spyOn(tangle, 'getValue').and.returnValue(void 0);
+          return expect(index.get_weight()).toEqual(50);
+        });
       });
     });
     return describe('reset', function() {
