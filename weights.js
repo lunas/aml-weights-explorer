@@ -349,12 +349,12 @@
       list.selectAll('tr').remove();
       return list.selectAll('tr').data(data).order().enter().append('tr').html(function(row, i) {
         var s;
-        s = '<td class="rank">' + row.rank + '</td>';
-        s += '<td class="country">' + row.country + '</td>';
-        s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>';
-        s += '<td class="rank">' + orig_data[i].rank + '</td>';
+        s = '<td class="rank">' + orig_data[i].rank + '</td>';
         s += '<td>' + orig_data[i].country + '</td>';
-        return s += '<td>' + d3.round(orig_data[i].OVERALL_SCORE, 2) + '</td>';
+        s += '<td>' + d3.round(orig_data[i].OVERALL_SCORE, 2) + '</td>';
+        s += '<td class="rank">' + row.rank + '</td>';
+        s += '<td class="country">' + row.country + '</td>';
+        return s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>';
       });
     };
     render_scatterplot = function(data, orig_data) {
@@ -407,7 +407,7 @@
         dy: '.75em',
         dx: -scatter_padding,
         transform: 'rotate(-90)'
-      }).text('Overall score based on new weights');
+      }).text('Overall score based on adjusted weights');
     };
     by_ = function(key, reverse) {
       if (reverse == null) {

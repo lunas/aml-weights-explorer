@@ -77,8 +77,7 @@ $ ->
 
     calculate_osc_weight: ()-> @get_weight() * @cat.get_weight() / 100
 
-    weight_sum_is_100: ()->
-      @near_100( @cat.weight_sum() )
+    weight_sum_is_100: ()-> @near_100( @cat.weight_sum() )
 
     mark_cat: (switch_on) ->
       index.mark(switch_on) for index in @cat.get_my_indices()
@@ -249,12 +248,13 @@ $ ->
       .enter()
       .append('tr')
       .html (row, i)->
-        s = '<td class="rank">' + row.rank + '</td>'
-        s += '<td class="country">' + row.country + '</td>'
-        s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>'
-        s += '<td class="rank">' + orig_data[i].rank + '</td>'
+        s = '<td class="rank">' + orig_data[i].rank + '</td>'
         s += '<td>' + orig_data[i].country + '</td>'
         s += '<td>' + d3.round(orig_data[i].OVERALL_SCORE, 2) + '</td>'
+
+        s += '<td class="rank">' + row.rank + '</td>'
+        s += '<td class="country">' + row.country + '</td>'
+        s += '<td>' + d3.round(row.OVERALL_SCORE, 2) + '</td>'
 
 
   render_scatterplot = (data, orig_data) ->
@@ -324,7 +324,7 @@ $ ->
       dy: '.75em'
       dx: - scatter_padding
       transform: 'rotate(-90)'
-    .text 'Overall score based on new weights'
+    .text 'Overall score based on adjusted weights'
 
 
 
