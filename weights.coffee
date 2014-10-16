@@ -1,4 +1,12 @@
 
+# Uses D3, jQuery, jQuery-UI, and Tangle.js to create a scatterplot of the AML Index Overall score
+# based on weights that the user provides via html input text fields.
+#
+# For a great tutorial on D3, see http://chimera.labs.oreilly.com/books/1230000000345/index.html
+#
+# See the unit tests in /spec for further details.
+
+
 # add a method to array that only sorts a copy of the array:
 Array.prototype.copy_sort = (cmp_fct) -> this.concat().sort( cmp_fct )
 
@@ -144,6 +152,8 @@ $ ->
 
 
 
+  # Model describing the relationships between categories and indices.
+  # This model is required by the tangle object.
   model = {
     categories: [
       new Category 'ML_TF', 65, 'osc'
@@ -429,4 +439,3 @@ $ ->
       alert(error)
     else
       initialize(data)
-
